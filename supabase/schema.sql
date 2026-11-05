@@ -49,7 +49,7 @@ create policy "owner deletes invites" on public.invites for delete using (owner 
 
 -- Hosts read replies and views of their own invitations.
 -- Guests never touch these tables directly: replies and views are written
--- by server routes that use the service role key after validating input.
+-- by the functions in guest_functions.sql, which validate input first.
 create policy "owner reads rsvps" on public.rsvps for select
   using (exists (select 1 from public.invites i where i.id = invite_id and i.owner = auth.uid()));
 create policy "owner reads views" on public.views for select

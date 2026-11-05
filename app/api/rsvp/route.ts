@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminClient } from "@/lib/supabase/admin";
+import { serverClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -18,15 +18,11 @@ export async function POST(req: Request) {
   if (!/^[a-z0-9]{4,32}$/.test(slug) || !name) return bad();
   if (resp !== "yes" && resp !== "maybe" && resp !== "no") return bad();
 
-  const admin = adminClient();
-  const { data: inv } = await admin.from("invites").select("id").eq("slug", slug).maybeSingle();
-  if (!inv) return bad(404);
-
-  // One reply per guest name per invitation. Sending again with the same name updates it.
-  const { error } = await admin.from("rsvps").upsert(
-    { invite_id: inv.id, name, name_key: name.toLowerCase().replace(/\s+/g, " "), resp, guests, note, updated_at: new Date().toISOString() },
-    { onConflict: "invite_id,name_key" }
-  );
+  // The database function validates again and writes the reply. No secret key involved.
+  const { data, error } = await serverClient().rpc("submit_rsvp", {
+    p_slug: slug, p_name: name, p_resp: resp, p_guests: guests, p_note: note,
+  });
   if (error) return bad(500);
+  if (data !== true) return bad(404);
   return NextResponse.json({ ok: true });
 }

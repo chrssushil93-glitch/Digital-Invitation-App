@@ -1,17 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { adminClient } from "@/lib/supabase/admin";
+import { serverClient } from "@/lib/supabase/server";
 import { artSvg, catLabel, designBy } from "@/lib/designs";
 import { G, asLang } from "@/lib/i18n";
 import GuestForm from "@/components/GuestForm";
 
 export const dynamic = "force-dynamic";
 
-const COLS = "slug,n1,n2,occ,lang,date_text,time_text,venue,msg,design";
-
 async function load(slug: string) {
   if (!/^[a-z0-9]{4,32}$/.test(slug)) return null;
-  const { data } = await adminClient().from("invites").select(COLS).eq("slug", slug).maybeSingle();
+  // Public fields only, through a database function. No secret key involved.
+  const { data } = await serverClient().rpc("get_public_invite", { p_slug: slug });
   return data as null | {
     slug: string; n1: string; n2: string; occ: string; lang: string;
     date_text: string; time_text: string; venue: string; msg: string; design: string;
