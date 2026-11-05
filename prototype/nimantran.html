@@ -1,0 +1,787 @@
+<title>Nimantran</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600&family=Rozha+One&display=swap">
+<style>
+/* Layout: one long page. Hero with a door-opening invitation, filterable design gallery, tradition strip, features, live RSVP demo with host dashboard, pricing. */
+:root{
+  --bg:#fbf6f1; --surface:#fffdfa; --fg:#2a1216; --muted:#6e5558; --line:#e6d6cc;
+  --maroon:#6b1428; --maroon-deep:#4a0d1c; --gold:#b8862b; --gold-soft:#e9d3a0; --on-maroon:#fbefe0;
+  --ok:#2f7a4f; --warn:#b3731a; --bad:#a63a3a;
+  --display:"Rozha One","Noto Serif Devanagari",Georgia,serif;
+  --body:"Hind","Noto Sans Devanagari",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#16080b; --surface:#220d12; --fg:#f6e9dc; --muted:#c3a9a3; --line:#432127;
+  --maroon:#8f2038; --maroon-deep:#3a0a16; --gold:#d9ac55; --gold-soft:#6d5420; --on-maroon:#fbefe0;
+  --ok:#5fc08a; --warn:#e0a24a; --bad:#e07a7a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#16080b; --surface:#220d12; --fg:#f6e9dc; --muted:#c3a9a3; --line:#432127;
+  --maroon:#8f2038; --maroon-deep:#3a0a16; --gold:#d9ac55; --gold-soft:#6d5420; --on-maroon:#fbefe0;
+  --ok:#5fc08a; --warn:#e0a24a; --bad:#e07a7a; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0;overflow-x:hidden}
+.wrap{max-width:1120px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.15;margin:0;text-wrap:balance}
+h1{font-size:clamp(2.4rem,7vw,4.4rem)}
+h2{font-size:clamp(1.8rem,4.5vw,2.8rem)}
+h3{font-size:1.3rem}
+p{margin:0}
+a{color:inherit}
+.eyebrow{font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:600}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:4px}
+button{font:inherit;cursor:pointer}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.8rem 1.4rem;border-radius:999px;border:1.5px solid var(--maroon);
+  background:var(--maroon);color:var(--on-maroon);font-weight:600;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--maroon)}
+:root[data-theme="dark"] .btn.ghost,:root:not([data-theme="light"]) .btn.ghost{color:var(--gold);border-color:var(--gold)}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .btn.ghost{color:var(--maroon);border-color:var(--maroon)}}
+
+/* header */
+header{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding-block:1.1rem}
+.logo{font-family:var(--display);font-size:1.6rem;color:var(--maroon);text-decoration:none;display:flex;align-items:center;gap:.5rem}
+:root[data-theme="dark"] .logo{color:var(--gold)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .logo{color:var(--gold)}}
+.logo svg{width:26px;height:26px}
+nav{display:flex;gap:1.4rem;flex-wrap:wrap;font-weight:500;font-size:.95rem}
+nav a{text-decoration:none;color:var(--muted)}
+nav a:hover{color:var(--fg)}
+.lang{display:inline-flex;border:1.5px solid var(--line);border-radius:999px;padding:3px;background:var(--surface)}
+.lang button{border:0;background:transparent;color:var(--muted);padding:.3rem .8rem;border-radius:999px;font-size:.9rem}
+.lang button[aria-pressed="true"]{background:var(--maroon);color:var(--on-maroon)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:3rem;align-items:center;padding-block:2.5rem 4rem}
+.hero p.lead{font-size:1.2rem;color:var(--muted);margin-block:1.2rem 1.8rem;max-width:34rem}
+.hero .actions{display:flex;gap:.8rem;flex-wrap:wrap}
+.pills{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.8rem}
+.pill{font-size:.85rem;padding:.25rem .8rem;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:var(--surface)}
+.stage{display:flex;flex-direction:column;align-items:center;gap:1rem;min-width:0}
+.phone{width:min(300px,100%);aspect-ratio:9/17;border-radius:34px;border:8px solid var(--maroon-deep);background:var(--maroon-deep);position:relative;overflow:hidden;box-shadow:0 30px 60px -25px rgba(74,13,28,.55)}
+.invite{position:absolute;inset:0;background:radial-gradient(circle at 50% 30%,#fff6e3,#f0dcae 70%);color:#4a0d1c;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.6rem;gap:.5rem}
+.invite .om{font-family:var(--display);font-size:1.6rem;color:#8a5e12}
+.invite .names{font-family:var(--display);font-size:2rem;line-height:1.1}
+.invite .amp{font-size:1.2rem;color:#8a5e12;font-family:var(--display)}
+.invite .when{font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;margin-top:.8rem}
+.invite .where{font-size:.9rem}
+.invite .rsvp{margin-top:1rem;background:#6b1428;color:#fbefe0;border-radius:999px;padding:.4rem 1.2rem;font-size:.85rem;font-weight:600}
+.door{position:absolute;top:0;bottom:0;width:50%;background:linear-gradient(90deg,#6b1428,#8f2038);z-index:2;display:flex;align-items:center}
+.door::after{content:"";position:absolute;inset:14px;border:1.5px solid #d9ac55;border-radius:140px 140px 6px 6px;opacity:.7}
+.door.l{left:0;justify-content:flex-end;transform:translateX(-100%);animation:openL 1.6s .5s cubic-bezier(.6,.05,.2,1) backwards}
+.door.r{right:0;transform:translateX(100%);animation:openR 1.6s .5s cubic-bezier(.6,.05,.2,1) backwards}
+.door i{width:12px;height:12px;border-radius:50%;background:#d9ac55;margin:0 10px;position:relative;z-index:1}
+.replaying .door.l{animation:openL 1.6s .2s cubic-bezier(.6,.05,.2,1) backwards}
+@keyframes openL{from{transform:translateX(0)}}
+@keyframes openR{from{transform:translateX(0)}}
+.replay{background:transparent;border:0;color:var(--muted);text-decoration:underline;font-size:.9rem}
+
+/* sections */
+section{padding-block:4rem;border-top:1px solid var(--line)}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:1rem;flex-wrap:wrap;margin-bottom:2rem}
+.sec-head p{color:var(--muted);max-width:32rem;margin-top:.6rem}
+.chips{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.6rem}
+.chip{border:1.5px solid var(--line);background:var(--surface);color:var(--fg);padding:.35rem 1rem;border-radius:999px;font-size:.92rem}
+.chip[aria-pressed="true"]{background:var(--maroon);border-color:var(--maroon);color:var(--on-maroon)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1.3rem}
+.card{display:flex;flex-direction:column;gap:.7rem;min-width:0}
+.art{aspect-ratio:3/4;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.art svg{width:100%;height:100%;display:block}
+.card h3{font-size:1.1rem}
+.meta{display:flex;justify-content:space-between;gap:.5rem;font-size:.88rem;color:var(--muted)}
+.price{color:var(--gold);font-weight:600}
+
+/* traditions */
+.trad{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.trad div{background:var(--surface);padding:1.1rem 1.2rem;min-width:0}
+.trad b{display:block;font-family:var(--display);font-weight:400;font-size:1.15rem}
+.trad span{font-size:.88rem;color:var(--muted)}
+.trad em{display:block;font-style:normal;font-size:.8rem;color:var(--gold);margin-top:.3rem}
+
+/* features */
+.feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:2rem 2.5rem}
+.feat h3{margin-bottom:.4rem}
+.feat p{color:var(--muted);font-size:.98rem}
+.feat .ico{width:42px;height:42px;border-radius:50%;background:var(--maroon);color:var(--on-maroon);display:grid;place-items:center;margin-bottom:.8rem}
+.feat .ico svg{width:20px;height:20px}
+
+/* demo */
+.demo{display:grid;grid-template-columns:1fr 1.15fr;gap:2rem;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:1.5rem;min-width:0}
+.panel h3{margin-bottom:1rem}
+label{display:block;font-size:.88rem;font-weight:600;margin-bottom:.3rem}
+input[type=text],input[type=number]{width:100%;font:inherit;padding:.65rem .8rem;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--fg)}
+.field{margin-bottom:1rem}
+.choices{display:flex;gap:.5rem;flex-wrap:wrap}
+.choices input{position:absolute;opacity:0;pointer-events:none}
+.choices label{margin:0;border:1.5px solid var(--line);border-radius:999px;padding:.4rem 1rem;font-weight:500;cursor:pointer;background:var(--bg)}
+.choices input:checked+label{background:var(--maroon);border-color:var(--maroon);color:var(--on-maroon)}
+.choices input:focus-visible+label{outline:3px solid var(--gold);outline-offset:2px}
+.thanks{margin-top:1rem;color:var(--ok);font-weight:600;min-height:1.6rem}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1.2rem}
+.stat{border:1px solid var(--line);border-radius:12px;padding:.6rem .8rem;background:var(--bg)}
+.stat b{display:block;font-family:var(--display);font-weight:400;font-size:1.6rem;line-height:1.2;font-variant-numeric:tabular-nums}
+.stat span{font-size:.78rem;color:var(--muted)}
+.spark{display:flex;align-items:flex-end;gap:6px;height:56px;margin-bottom:.4rem}
+.spark i{flex:1;background:var(--gold);border-radius:3px 3px 0 0;opacity:.85}
+.days{display:flex;gap:6px;font-size:.72rem;color:var(--muted);margin-bottom:1.2rem}
+.days span{flex:1;text-align:center}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th{text-align:left;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:.4rem .5rem;border-bottom:1px solid var(--line)}
+td{padding:.55rem .5rem;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.tag{font-size:.78rem;padding:.1rem .6rem;border-radius:999px;border:1px solid currentColor;font-weight:600}
+.tag.yes{color:var(--ok)}.tag.maybe{color:var(--warn)}.tag.no{color:var(--bad)}
+.note{font-size:.82rem;color:var(--muted);margin-top:.8rem}
+.row-actions{display:flex;gap:.6rem;align-items:center;margin-top:1rem;flex-wrap:wrap}
+.small{padding:.45rem 1rem;font-size:.9rem}
+
+/* pricing */
+.price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.3rem}
+.tier{border:1px solid var(--line);background:var(--surface);border-radius:18px;padding:1.6rem;display:flex;flex-direction:column;gap:.8rem;min-width:0}
+.tier.hot{border:2px solid var(--gold)}
+.tier .amt{font-family:var(--display);font-size:2.4rem;color:var(--maroon)}
+:root[data-theme="dark"] .tier .amt{color:var(--gold)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tier .amt{color:var(--gold)}}
+.tier ul{margin:0;padding-left:1.1rem;color:var(--muted);font-size:.96rem}
+.cta{background:var(--maroon-deep);color:var(--on-maroon);border-radius:22px;padding:clamp(1.8rem,5vw,3.5rem);text-align:center;display:flex;flex-direction:column;align-items:center;gap:1rem;margin-block:1rem 3rem}
+.cta .btn{background:var(--gold);border-color:var(--gold);color:#2a1216}
+footer{border-top:1px solid var(--line);padding-block:2rem 3rem;color:var(--muted);font-size:.9rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+
+/* studio and guest views */
+.view{padding-block:1.2rem 4rem}
+.vhead{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.studio{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);gap:1.5rem;align-items:start}
+.stack{display:grid;gap:1.5rem;min-width:0}
+.ilist{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem}
+.iitem{text-align:left;border:1.5px solid var(--line);background:var(--bg);color:var(--fg);padding:.6rem .9rem;border-radius:12px;width:100%;line-height:1.35}
+.iitem small{display:block;color:var(--muted)}
+.iitem[aria-current="true"]{border-color:var(--maroon);background:var(--surface)}
+select,textarea{width:100%;font:inherit;padding:.65rem .8rem;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--fg)}
+textarea{min-height:5rem;resize:vertical}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 1rem}
+.prevrow{display:flex;gap:1rem;align-items:center}
+.prevrow .art{width:84px;flex:none}
+.linkbox{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+.linkbox code{flex:1 1 220px;min-width:0;word-break:break-all;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:.5rem .7rem;font-size:.85rem}
+.gwrap{max-width:460px;margin:1rem auto 0;display:grid;gap:1.4rem}
+.gcard{position:relative;overflow:hidden;border-radius:22px;border:1px solid var(--line)}
+.gart svg{display:block;width:100%;height:auto}
+.gin{padding:1.2rem 1.6rem 2rem;text-align:center;display:grid;gap:.4rem}
+.gk{letter-spacing:.18em;text-transform:uppercase;font-size:.8rem}
+.gn{font-family:var(--display);font-size:2.1rem;line-height:1.1;margin:0}
+.gamp{font-family:var(--display);font-size:1.3rem}
+.gwhen{font-weight:600;letter-spacing:.06em;margin-top:.6rem}
+.gmsg{margin-top:.6rem;font-style:italic}
+.gfoot{text-align:center;font-size:.85rem;color:var(--muted)}
+.err{color:var(--bad)}
+@media (max-width:820px){.studio{grid-template-columns:1fr}.fgrid{grid-template-columns:1fr}}
+@media (max-width:820px){
+  .hero,.demo{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  section{padding-block:3rem}
+}
+@media (prefers-reduced-motion: reduce){.door{animation:none!important}.door.l{transform:translateX(-100%)}.door.r{transform:translateX(100%)}}
+</style>
+
+<div class="wrap" id="viewHome">
+<header>
+  <a class="logo" href="#top" aria-label="Nimantran">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 4c3 4 3 9 0 13-3-4-3-9 0-13z"/><path d="M16 17c4-1 8-4 10-8-5 0-9 3-10 8z"/><path d="M16 17c-4-1-8-4-10-8 5 0 9 3 10 8z"/><path d="M8 24h16M11 28h10"/></g></svg>
+    Nimantran
+  </a>
+  <nav aria-label="Main">
+    <a href="#designs" data-i18n="nav_designs">Designs</a>
+    <a href="#traditions" data-i18n="nav_trad">Traditions</a>
+    <a href="#features" data-i18n="nav_feat">Features</a>
+    <a href="#demo" data-i18n="nav_demo">Try RSVP</a>
+    <a href="#pricing" data-i18n="nav_price">Pricing</a>
+  </nav>
+  <a class="btn small" href="#studio">Host studio</a>
+  <div class="lang" role="group" aria-label="Language">
+    <button data-lang="en" aria-pressed="true">English</button>
+    <button data-lang="hi" aria-pressed="false">हिन्दी</button>
+    <button data-lang="mr" aria-pressed="false">मराठी</button>
+  </div>
+</header>
+
+<main id="top">
+<div class="hero">
+  <div>
+    <p class="eyebrow" data-i18n="eyebrow">Animated invitations · Hindi · English · Marathi</p>
+    <h1 data-i18n="h1">An invitation that opens like a door.</h1>
+    <p class="lead" data-i18n="lead">Pick a design, add your names and ceremonies, and share one link on WhatsApp. Guests reply with a tap and you see who has opened it.</p>
+    <div class="actions">
+      <a class="btn" href="#designs" data-i18n="cta1">Browse designs</a>
+      <a class="btn ghost" href="#demo" data-i18n="cta2">Try the RSVP</a>
+    </div>
+    <div class="pills">
+      <span class="pill" data-i18n="pill1">Built-in RSVPs</span>
+      <span class="pill" data-i18n="pill2">View tracking</span>
+      <span class="pill" data-i18n="pill3">Edit after sharing</span>
+      <span class="pill" data-i18n="pill4">Video and PDF to keep</span>
+    </div>
+  </div>
+  <div class="stage" id="stage">
+    <div class="phone" aria-label="Sample invitation opening">
+      <div class="invite">
+        <div class="om">॥ श्री गणेशाय नमः ॥</div>
+        <div class="names">Meera</div><div class="amp">&amp;</div><div class="names">Kabir</div>
+        <div class="when">14 · 02 · 2027 &nbsp;|&nbsp; 7:30 PM</div>
+        <div class="where">Sample · Udaipur</div>
+        <div class="rsvp" data-i18n="rsvp_btn_in">RSVP</div>
+      </div>
+      <div class="door l"><i></i></div>
+      <div class="door r"><i></i></div>
+    </div>
+    <button class="replay" id="replay" data-i18n="replay">Replay the doors</button>
+  </div>
+</div>
+
+<section id="designs">
+  <div class="sec-head">
+    <div>
+      <p class="eyebrow" data-i18n="d_eye">The collection</p>
+      <h2 data-i18n="d_h">What are we celebrating?</h2>
+      <p data-i18n="d_p">Sample designs shown here to demonstrate the gallery. Filter by occasion.</p>
+    </div>
+  </div>
+  <div class="chips" id="chips" role="group" aria-label="Occasion filter"></div>
+  <div class="grid" id="grid"></div>
+</section>
+
+<section id="traditions">
+  <div class="sec-head">
+    <div>
+      <p class="eyebrow" data-i18n="t_eye">Weddings, the way your family celebrates</p>
+      <h2 data-i18n="t_h">Designed from each tradition.</h2>
+    </div>
+  </div>
+  <div class="trad" id="trad"></div>
+</section>
+
+<section id="features">
+  <div class="sec-head">
+    <div>
+      <p class="eyebrow" data-i18n="f_eye">After you press send</p>
+      <h2 data-i18n="f_h">Everything that happens next, handled.</h2>
+    </div>
+  </div>
+  <div class="feat">
+    <div><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1"/></svg></div><h3 data-i18n="f1h">One link for every guest</h3><p data-i18n="f1p">Share on WhatsApp, Instagram or SMS. Change a venue or time later and the same link shows the update.</p></div>
+    <div><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></div><h3 data-i18n="f2h">See who opened it</h3><p data-i18n="f2p">Daily views and unique guests, so you know who has seen it before you call.</p></div>
+    <div><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div><h3 data-i18n="f3h">RSVPs that answer themselves</h3><p data-i18n="f3p">Guests choose coming, maybe or can't make it, add a head-count and leave a blessing. No app or sign-up.</p></div>
+    <div><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div><h3 data-i18n="f4h">A guest list for the caterer</h3><p data-i18n="f4p">Every reply lands in one list with names and head-counts. Download it as CSV for Excel or Sheets.</p></div>
+    <div><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div><h3 data-i18n="f5h">A report every Monday</h3><p data-i18n="f5p">A short email with views, new replies and who is coming. Switch it off any time.</p></div>
+    <div><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 19h16"/></svg></div><h3 data-i18n="f6h">Keep it forever</h3><p data-i18n="f6p">Download the invitation as a video with music, a print-ready PDF and a phone-screen image.</p></div>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="sec-head">
+    <div>
+      <p class="eyebrow" data-i18n="x_eye">Live demo</p>
+      <h2 data-i18n="x_h">Reply as a guest. Watch the host's list.</h2>
+      <p data-i18n="x_p">Everything below is example data. Submit a reply and the dashboard updates.</p>
+    </div>
+  </div>
+  <div class="demo">
+    <form class="panel" id="rsvpForm" novalidate>
+      <h3 data-i18n="x_form">Will you join us?</h3>
+      <div class="field"><label for="gname" data-i18n="x_name">Your name</label><input type="text" id="gname" autocomplete="off" placeholder="Asha Kulkarni"></div>
+      <div class="field">
+        <label id="lblresp" data-i18n="x_resp">Your reply</label>
+        <div class="choices" role="radiogroup" aria-labelledby="lblresp">
+          <input type="radio" name="resp" id="r-yes" value="yes" checked><label for="r-yes" data-i18n="x_yes">Joyfully yes</label>
+          <input type="radio" name="resp" id="r-maybe" value="maybe"><label for="r-maybe" data-i18n="x_maybe">Maybe</label>
+          <input type="radio" name="resp" id="r-no" value="no"><label for="r-no" data-i18n="x_no">Sadly no</label>
+        </div>
+      </div>
+      <div class="field"><label for="gcount" data-i18n="x_guests">Guests</label><input type="number" id="gcount" min="1" max="20" value="2"></div>
+      <button class="btn" type="submit" data-i18n="x_send">Send my reply</button>
+      <div class="thanks" id="thanks" role="status"></div>
+    </form>
+
+    <div class="panel">
+      <h3 data-i18n="x_dash">Host dashboard</h3>
+      <div class="stats">
+        <div class="stat"><b id="sViews">1,284</b><span data-i18n="x_views">views</span></div>
+        <div class="stat"><b id="sYes">0</b><span data-i18n="x_coming">coming</span></div>
+        <div class="stat"><b id="sMaybe">0</b><span data-i18n="x_maybes">maybe</span></div>
+        <div class="stat"><b id="sHead">0</b><span data-i18n="x_head">head-count</span></div>
+      </div>
+      <div class="spark" id="spark" aria-hidden="true"></div>
+      <div class="days" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+      <div class="tbl"><table>
+        <thead><tr><th data-i18n="x_th1">Guest</th><th data-i18n="x_th2">Reply</th><th data-i18n="x_th3">People</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table></div>
+      <div class="row-actions">
+        <button class="btn ghost small" id="copyCsv" type="button" data-i18n="x_csv">Copy guest list as CSV</button>
+        <span class="note" id="csvNote" role="status"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="sec-head">
+    <div>
+      <p class="eyebrow" data-i18n="p_eye">Simple pricing</p>
+      <h2 data-i18n="p_h">One price per invitation.</h2>
+      <p data-i18n="p_p">Sample pricing for this concept. RSVPs, tracking and weekly reports are included in every plan.</p>
+    </div>
+  </div>
+  <div class="price-grid">
+    <div class="tier"><h3 data-i18n="p1">Still</h3><div class="amt">₹99</div><ul><li data-i18n="p1a">Beautifully still design</li><li data-i18n="p1b">One language</li><li data-i18n="p1c">RSVPs and tracking</li></ul></div>
+    <div class="tier hot"><h3 data-i18n="p2">Animated</h3><div class="amt">₹399</div><ul><li data-i18n="p2a">Doors, music and motion</li><li data-i18n="p2b">Up to three languages</li><li data-i18n="p2c">Video, PDF and image downloads</li></ul></div>
+    <div class="tier"><h3 data-i18n="p3">Custom</h3><div class="amt">₹1,499</div><ul><li data-i18n="p3a">Designed around your story</li><li data-i18n="p3b">Your illustrations and photos</li><li data-i18n="p3c">Every ceremony on its own page</li></ul></div>
+  </div>
+</section>
+
+<div class="cta">
+  <h2 data-i18n="c_h">A little invite. A lifetime of memories.</h2>
+  <a class="btn" href="#designs" data-i18n="c_b">Find your invitation</a>
+</div>
+</main>
+
+<footer>
+  <span>© 2026 Nimantran · <span data-i18n="foot">Concept site with sample designs and prices</span></span>
+  <span data-i18n="foot2">निमंत्रण means invitation</span>
+</footer>
+</div>
+
+<div class="wrap view" id="viewStudio" hidden>
+  <div class="vhead">
+    <a class="logo" href="#home">Nimantran</a>
+    <span class="eyebrow">Host studio</span>
+    <a class="btn ghost small" href="#home">Back to site</a>
+  </div>
+  <div id="studioBody"></div>
+</div>
+<div class="wrap view" id="viewGuest" hidden>
+  <div id="guestBody"></div>
+</div>
+
+<script>
+(function(){
+var T={
+en:{nav_designs:"Designs",nav_trad:"Traditions",nav_feat:"Features",nav_demo:"Try RSVP",nav_price:"Pricing",
+eyebrow:"Animated invitations · Hindi · English · Marathi",h1:"An invitation that opens like a door.",
+lead:"Pick a design, add your names and ceremonies, and share one link on WhatsApp. Guests reply with a tap and you see who has opened it.",
+cta1:"Browse designs",cta2:"Try the RSVP",pill1:"Built-in RSVPs",pill2:"View tracking",pill3:"Edit after sharing",pill4:"Video and PDF to keep",
+rsvp_btn_in:"RSVP",replay:"Replay the doors",
+d_eye:"The collection",d_h:"What are we celebrating?",d_p:"Sample designs shown here to demonstrate the gallery. Filter by occasion.",
+t_eye:"Weddings, the way your family celebrates",t_h:"Designed from each tradition.",
+f_eye:"After you press send",f_h:"Everything that happens next, handled.",
+f1h:"One link for every guest",f1p:"Share on WhatsApp, Instagram or SMS. Change a venue or time later and the same link shows the update.",
+f2h:"See who opened it",f2p:"Daily views and unique guests, so you know who has seen it before you call.",
+f3h:"RSVPs that answer themselves",f3p:"Guests choose coming, maybe or can't make it, add a head-count and leave a blessing. No app or sign-up.",
+f4h:"A guest list for the caterer",f4p:"Every reply lands in one list with names and head-counts. Download it as CSV for Excel or Sheets.",
+f5h:"A report every Monday",f5p:"A short email with views, new replies and who is coming. Switch it off any time.",
+f6h:"Keep it forever",f6p:"Download the invitation as a video with music, a print-ready PDF and a phone-screen image.",
+x_eye:"Live demo",x_h:"Reply as a guest. Watch the host's list.",x_p:"Everything below is example data. Submit a reply and the dashboard updates.",
+x_form:"Will you join us?",x_name:"Your name",x_resp:"Your reply",x_yes:"Joyfully yes",x_maybe:"Maybe",x_no:"Sadly no",x_guests:"Guests",x_send:"Send my reply",
+x_dash:"Host dashboard",x_views:"views",x_coming:"coming",x_maybes:"maybe",x_head:"head-count",x_th1:"Guest",x_th2:"Reply",x_th3:"People",x_csv:"Copy guest list as CSV",
+p_eye:"Simple pricing",p_h:"One price per invitation.",p_p:"Sample pricing for this concept. RSVPs, tracking and weekly reports are included in every plan.",
+p1:"Still",p1a:"Beautifully still design",p1b:"One language",p1c:"RSVPs and tracking",
+p2:"Animated",p2a:"Doors, music and motion",p2b:"Up to three languages",p2c:"Video, PDF and image downloads",
+p3:"Custom",p3a:"Designed around your story",p3b:"Your illustrations and photos",p3c:"Every ceremony on its own page",
+c_h:"A little invite. A lifetime of memories.",c_b:"Find your invitation",foot:"Concept site with sample designs and prices",foot2:"निमंत्रण means invitation",
+thanks:"Thank you, {n}! Your reply is on the host's list.",need:"Please enter your name.",csvok:"Copied.",csvfail:"Copy blocked here. Select the table instead.",all:"All"},
+hi:{nav_designs:"डिज़ाइन",nav_trad:"परंपराएँ",nav_feat:"सुविधाएँ",nav_demo:"RSVP आज़माएँ",nav_price:"मूल्य",
+eyebrow:"एनिमेटेड निमंत्रण · हिन्दी · English · मराठी",h1:"ऐसा निमंत्रण जो द्वार की तरह खुलता है।",
+lead:"डिज़ाइन चुनें, नाम और रस्में जोड़ें और WhatsApp पर एक लिंक भेजें। मेहमान एक टैप में जवाब देते हैं और आप देखते हैं कि किसने खोला।",
+cta1:"डिज़ाइन देखें",cta2:"RSVP आज़माएँ",pill1:"अपना RSVP",pill2:"व्यू ट्रैकिंग",pill3:"भेजने के बाद भी बदलाव",pill4:"वीडियो और PDF सहेजें",
+rsvp_btn_in:"RSVP",replay:"द्वार फिर खोलें",
+d_eye:"संग्रह",d_h:"हम किस खुशी का जश्न मना रहे हैं?",d_p:"गैलरी दिखाने के लिए नमूना डिज़ाइन। अवसर के अनुसार छाँटें।",
+t_eye:"विवाह, आपके परिवार की रीत से",t_h:"हर परंपरा से बने डिज़ाइन।",
+f_eye:"भेजने के बाद",f_h:"आगे का सब कुछ संभला हुआ।",
+f1h:"हर मेहमान के लिए एक लिंक",f1p:"WhatsApp, Instagram या SMS पर भेजें। स्थान या समय बदलें तो वही लिंक नया रूप दिखाता है।",
+f2h:"देखें किसने खोला",f2p:"रोज़ के व्यू और अलग-अलग मेहमान, ताकि फ़ोन करने से पहले पता रहे।",
+f3h:"खुद जवाब देने वाला RSVP",f3p:"मेहमान आऊँगा, शायद या नहीं आ पाऊँगा चुनते हैं, संख्या बताते हैं और शुभकामना लिखते हैं। ऐप या साइन-अप नहीं।",
+f4h:"कैटरर के लिए मेहमानों की सूची",f4p:"हर जवाब नाम और संख्या के साथ एक सूची में। Excel या Sheets के लिए CSV डाउनलोड करें।",
+f5h:"हर सोमवार रिपोर्ट",f5p:"व्यू, नए जवाब और कौन आ रहा है, इसका छोटा ईमेल। जब चाहें बंद करें।",
+f6h:"हमेशा के लिए सहेजें",f6p:"निमंत्रण को संगीत सहित वीडियो, प्रिंट के लिए PDF और फ़ोन-स्क्रीन इमेज में डाउनलोड करें।",
+x_eye:"लाइव डेमो",x_h:"मेहमान बनकर जवाब दें। मेज़बान की सूची देखें।",x_p:"नीचे सब नमूना डेटा है। जवाब भेजें और डैशबोर्ड बदल जाएगा।",
+x_form:"क्या आप आएँगे?",x_name:"आपका नाम",x_resp:"आपका जवाब",x_yes:"खुशी से हाँ",x_maybe:"शायद",x_no:"खेद है, नहीं",x_guests:"मेहमान",x_send:"जवाब भेजें",
+x_dash:"मेज़बान डैशबोर्ड",x_views:"व्यू",x_coming:"आ रहे हैं",x_maybes:"शायद",x_head:"कुल संख्या",x_th1:"मेहमान",x_th2:"जवाब",x_th3:"लोग",x_csv:"मेहमान सूची CSV में कॉपी करें",
+p_eye:"सीधा मूल्य",p_h:"हर निमंत्रण का एक मूल्य।",p_p:"इस कॉन्सेप्ट के नमूना मूल्य। RSVP, ट्रैकिंग और साप्ताहिक रिपोर्ट हर प्लान में शामिल।",
+p1:"स्थिर",p1a:"सुंदर स्थिर डिज़ाइन",p1b:"एक भाषा",p1c:"RSVP और ट्रैकिंग",
+p2:"एनिमेटेड",p2a:"द्वार, संगीत और गति",p2b:"तीन भाषाओं तक",p2c:"वीडियो, PDF और इमेज डाउनलोड",
+p3:"कस्टम",p3a:"आपकी कहानी पर बना",p3b:"आपके चित्र और फ़ोटो",p3c:"हर रस्म का अलग पन्ना",
+c_h:"एक छोटा सा निमंत्रण। उम्र भर की यादें।",c_b:"अपना निमंत्रण खोजें",foot:"नमूना डिज़ाइन और मूल्य वाली कॉन्सेप्ट साइट",foot2:"निमंत्रण यानी बुलावा",
+thanks:"धन्यवाद, {n}! आपका जवाब मेज़बान की सूची में जुड़ गया।",need:"कृपया अपना नाम लिखें।",csvok:"कॉपी हो गया।",csvfail:"यहाँ कॉपी नहीं हो सकी। तालिका चुनकर कॉपी करें।",all:"सभी"},
+mr:{nav_designs:"डिझाइन",nav_trad:"परंपरा",nav_feat:"वैशिष्ट्ये",nav_demo:"RSVP पहा",nav_price:"किंमत",
+eyebrow:"अॅनिमेटेड आमंत्रणे · मराठी · हिन्दी · English",h1:"दारासारखे उघडणारे आमंत्रण.",
+lead:"डिझाइन निवडा, नावे आणि विधी भरा आणि WhatsApp वर एक लिंक पाठवा. पाहुणे एका टॅपमध्ये उत्तर देतात आणि कोणी उघडले ते तुम्हाला दिसते.",
+cta1:"डिझाइन पहा",cta2:"RSVP पहा",pill1:"स्वतःचा RSVP",pill2:"व्ह्यू ट्रॅकिंग",pill3:"पाठवल्यानंतरही बदल",pill4:"व्हिडिओ आणि PDF जपून ठेवा",
+rsvp_btn_in:"RSVP",replay:"दारे पुन्हा उघडा",
+d_eye:"संग्रह",d_h:"आपण कशाचा आनंद साजरा करतोय?",d_p:"गॅलरी दाखवण्यासाठी नमुना डिझाइन. प्रसंगानुसार निवडा.",
+t_eye:"विवाह, तुमच्या कुटुंबाच्या रीतीने",t_h:"प्रत्येक परंपरेतून घडवलेले डिझाइन.",
+f_eye:"पाठवल्यानंतर",f_h:"पुढचे सगळे सांभाळले जाते.",
+f1h:"प्रत्येक पाहुण्यासाठी एकच लिंक",f1p:"WhatsApp, Instagram किंवा SMS वर पाठवा. ठिकाण किंवा वेळ बदलली तर तीच लिंक नवे रूप दाखवते.",
+f2h:"कोणी उघडले ते पहा",f2p:"रोजचे व्ह्यू आणि वेगवेगळे पाहुणे, म्हणजे फोन करण्याआधी कळते.",
+f3h:"आपोआप उत्तर देणारा RSVP",f3p:"पाहुणे येणार, कदाचित किंवा येता येणार नाही निवडतात, संख्या सांगतात आणि शुभेच्छा लिहितात. अॅप किंवा साइन-अप नाही.",
+f4h:"केटररसाठी पाहुण्यांची यादी",f4p:"प्रत्येक उत्तर नाव आणि संख्येसह एका यादीत. Excel किंवा Sheets साठी CSV डाउनलोड करा.",
+f5h:"दर सोमवारी अहवाल",f5p:"व्ह्यू, नवी उत्तरे आणि कोण येत आहे याचा छोटा ईमेल. हवे तेव्हा बंद करा.",
+f6h:"कायमचे जपून ठेवा",f6p:"आमंत्रण संगीतासह व्हिडिओ, छापण्यासाठी PDF आणि फोन-स्क्रीन इमेज म्हणून डाउनलोड करा.",
+x_eye:"थेट डेमो",x_h:"पाहुणे म्हणून उत्तर द्या. यजमानाची यादी पहा.",x_p:"खाली सर्व नमुना डेटा आहे. उत्तर पाठवा आणि डॅशबोर्ड बदलेल.",
+x_form:"तुम्ही याल का?",x_name:"तुमचे नाव",x_resp:"तुमचे उत्तर",x_yes:"आनंदाने हो",x_maybe:"कदाचित",x_no:"क्षमस्व, नाही",x_guests:"पाहुणे",x_send:"उत्तर पाठवा",
+x_dash:"यजमान डॅशबोर्ड",x_views:"व्ह्यू",x_coming:"येत आहेत",x_maybes:"कदाचित",x_head:"एकूण संख्या",x_th1:"पाहुणे",x_th2:"उत्तर",x_th3:"लोक",x_csv:"पाहुण्यांची यादी CSV म्हणून कॉपी करा",
+p_eye:"सोपी किंमत",p_h:"प्रत्येक आमंत्रणाची एकच किंमत.",p_p:"या संकल्पनेसाठी नमुना किंमती. RSVP, ट्रॅकिंग आणि साप्ताहिक अहवाल प्रत्येक प्लॅनमध्ये समाविष्ट.",
+p1:"स्थिर",p1a:"सुंदर स्थिर डिझाइन",p1b:"एक भाषा",p1c:"RSVP आणि ट्रॅकिंग",
+p2:"अॅनिमेटेड",p2a:"दारे, संगीत आणि हालचाल",p2b:"तीन भाषांपर्यंत",p2c:"व्हिडिओ, PDF आणि इमेज डाउनलोड",
+p3:"कस्टम",p3a:"तुमच्या कथेवर आधारित",p3b:"तुमची चित्रे आणि फोटो",p3c:"प्रत्येक विधीचे वेगळे पान",
+c_h:"एक छोटेसे आमंत्रण. आयुष्यभराच्या आठवणी.",c_b:"तुमचे आमंत्रण शोधा",foot:"नमुना डिझाइन आणि किंमती असलेली संकल्पना साइट",foot2:"निमंत्रण म्हणजे आमंत्रण",
+thanks:"धन्यवाद, {n}! तुमचे उत्तर यजमानाच्या यादीत जोडले गेले.",need:"कृपया तुमचे नाव लिहा.",csvok:"कॉपी झाले.",csvfail:"येथे कॉपी होऊ शकले नाही. तक्ता निवडून कॉपी करा.",all:"सर्व"}
+};
+var lang="en";
+var cats=[
+ {id:"wedding",en:"Wedding",hi:"विवाह",mr:"विवाह"},
+ {id:"engagement",en:"Engagement",hi:"सगाई",mr:"साखरपुडा"},
+ {id:"birthday",en:"Birthday",hi:"जन्मदिन",mr:"वाढदिवस"},
+ {id:"baby",en:"Baby shower",hi:"गोद भराई",mr:"डोहाळे जेवण"},
+ {id:"home",en:"Housewarming",hi:"गृह प्रवेश",mr:"गृहप्रवेश"},
+ {id:"puja",en:"Pooja",hi:"पूजा",mr:"पूजा"}
+];
+var designs=[
+ {n:"Lotus Court",c:"engagement",p:99,a:"#6b1428",b:"#e9d3a0",m:"lotus"},
+ {n:"Peacock Night",c:"wedding",p:399,a:"#0f4c4a",b:"#d9ac55",m:"arch"},
+ {n:"Marigold Morning",c:"wedding",p:399,a:"#c9791b",b:"#fff0c9",m:"sun"},
+ {n:"Rose Terrace",c:"engagement",p:99,a:"#a8475a",b:"#fbe3e3",m:"lotus"},
+ {n:"Jharokha",c:"wedding",p:399,a:"#7a2e17",b:"#f2d7b0",m:"arch"},
+ {n:"First Candle",c:"birthday",p:199,a:"#2f3e8f",b:"#ffe9a8",m:"sun"},
+ {n:"Little Moon",c:"baby",p:199,a:"#3b6e82",b:"#f3e7d3",m:"moon"},
+ {n:"Naya Ghar",c:"home",p:199,a:"#2f6b4a",b:"#f6e6bf",m:"arch"},
+ {n:"Satyanarayan Katha",c:"puja",p:149,a:"#b8531b",b:"#fff1d6",m:"sun"},
+ {n:"Golden Fifty",c:"birthday",p:199,a:"#1d1a14",b:"#d9ac55",m:"moon"},
+ {n:"Sapphire Sangeet",c:"wedding",p:399,a:"#1e3a8a",b:"#e5d4a1",m:"lotus"},
+ {n:"Tulsi Courtyard",c:"home",p:199,a:"#456a2e",b:"#efe7c6",m:"lotus"}
+];
+function art(d,noname){
+ var motif="";
+ if(d.m==="lotus"){motif='<g transform="translate(150 150)" fill="none" stroke="'+d.b+'" stroke-width="2">'+[0,-35,35,-70,70].map(function(r){return '<ellipse cx="0" cy="-34" rx="14" ry="34" transform="rotate('+r+')"/>'}).join("")+'</g>'}
+ if(d.m==="arch"){motif='<path d="M70 250V150a80 80 0 0 1 160 0v100z" fill="none" stroke="'+d.b+'" stroke-width="2.5"/><path d="M90 250V155a60 60 0 0 1 120 0v95z" fill="none" stroke="'+d.b+'" stroke-width="1.5" opacity=".7"/><circle cx="150" cy="120" r="10" fill="'+d.b+'"/>'}
+ if(d.m==="sun"){motif='<circle cx="150" cy="150" r="32" fill="'+d.b+'"/>'+Array.from({length:16}).map(function(_,i){var a=i*22.5;return '<line x1="150" y1="98" x2="150" y2="84" stroke="'+d.b+'" stroke-width="3" transform="rotate('+a+' 150 150)"/>'}).join("")}
+ if(d.m==="moon"){motif='<circle cx="150" cy="150" r="42" fill="'+d.b+'"/><circle cx="168" cy="140" r="38" fill="'+d.a+'"/><circle cx="90" cy="100" r="2" fill="'+d.b+'"/><circle cx="215" cy="95" r="2.5" fill="'+d.b+'"/><circle cx="205" cy="215" r="2" fill="'+d.b+'"/>'}
+ return '<svg viewBox="0 0 300 400" role="img" aria-label="'+d.n+'"><rect width="300" height="400" fill="'+d.a+'"/><rect x="14" y="14" width="272" height="372" rx="6" fill="none" stroke="'+d.b+'" stroke-width="1.5" opacity=".8"/>'+motif+(noname?'':'<text x="150" y="310" text-anchor="middle" font-family="Rozha One,Georgia,serif" font-size="24" fill="'+d.b+'">'+d.n+'</text><line x1="110" y1="330" x2="190" y2="330" stroke="'+d.b+'" stroke-width="1.2"/>')+'</svg>';
+}
+var filter="all";
+function renderChips(){
+ var el=document.getElementById("chips");
+ var h='<button class="chip" data-c="all" aria-pressed="'+(filter==="all")+'">'+T[lang].all+'</button>';
+ cats.forEach(function(c){h+='<button class="chip" data-c="'+c.id+'" aria-pressed="'+(filter===c.id)+'">'+c[lang]+'</button>'});
+ el.innerHTML=h;
+}
+function catName(id){return cats.filter(function(c){return c.id===id})[0][lang]}
+function renderGrid(){
+ var el=document.getElementById("grid");
+ el.innerHTML=designs.filter(function(d){return filter==="all"||d.c===filter}).map(function(d){
+  return '<article class="card"><div class="art">'+art(d)+'</div><h3>'+d.n+'</h3><div class="meta"><span>'+catName(d.c)+'</span><span class="price">₹'+d.p+'</span></div></article>';
+ }).join("");
+}
+document.getElementById("chips").addEventListener("click",function(e){
+ var b=e.target.closest("button");if(!b)return;filter=b.dataset.c;renderChips();renderGrid();
+});
+
+var trads=[
+ ["Punjabi","ਪੰਜਾਬੀ · हिन्दी · English","Phulkari, dhol, Anand Karaj"],
+ ["Rajasthani","हिन्दी · English","Palaces, leheriya, jharokha"],
+ ["Maharashtrian","मराठी · हिन्दी · English","Paithani, Peshwai wada, mundavalya"],
+ ["Gujarati","ગુજરાતી · हिन्दी · English","Gharchola, mirror work, garba"],
+ ["South Indian","தமிழ் · हिन्दी · English","Kolam, Kanjeevaram, temple"],
+ ["Bengali","বাংলা · हिन्दी · English","Alpana, shola, Shubho Drishti"],
+ ["Kerala","മലയാളം · English","Kasavu, nilavilakku, backwaters"],
+ ["Sindhi","हिन्दी · English","Ajrak, ralli, bhart"],
+ ["Kashmiri","اردو · English","Chinar, sozni, Dal Lake"],
+ ["Modern fusion","English · हिन्दी","Editorial, minimal, line art"]
+];
+document.getElementById("trad").innerHTML=trads.map(function(t){return '<div><b>'+t[0]+'</b><span>'+t[2]+'</span><em>'+t[1]+'</em></div>'}).join("");
+
+/* i18n */
+function applyLang(l){
+ lang=l;document.documentElement.lang=l;
+ document.querySelectorAll("[data-i18n]").forEach(function(el){var k=el.getAttribute("data-i18n");if(T[l][k])el.textContent=T[l][k]});
+ document.querySelectorAll(".lang button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.lang===l))});
+ renderChips();renderGrid();renderRows();
+}
+document.querySelector(".lang").addEventListener("click",function(e){var b=e.target.closest("button");if(b)applyLang(b.dataset.lang)});
+
+/* doors */
+document.getElementById("replay").addEventListener("click",function(){
+ var s=document.getElementById("stage");s.classList.remove("replaying");
+ var doors=s.querySelectorAll(".door");doors.forEach(function(d){d.style.animation="none"});
+ void s.offsetWidth;
+ doors.forEach(function(d){d.style.animation=""});
+});
+
+/* demo data */
+var guests=[
+ {n:"Asha Kulkarni",r:"yes",c:3},{n:"Rohan Mehta",r:"maybe",c:1},{n:"Priya & Amit",r:"yes",c:2},{n:"Sunita Aunty",r:"yes",c:4},{n:"Kabir Rao",r:"no",c:1}
+];
+var views=[120,168,140,210,256,198,192];
+document.getElementById("spark").innerHTML=views.map(function(v){return '<i style="height:'+Math.round(v/256*100)+'%"></i>'}).join("");
+function esc(s){return s.replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function renderRows(){
+ var lbl={yes:T[lang].x_coming,maybe:T[lang].x_maybes,no:T[lang].x_no};
+ document.getElementById("rows").innerHTML=guests.map(function(g){
+  return '<tr><td>'+esc(g.n)+'</td><td><span class="tag '+g.r+'">'+lbl[g.r]+'</span></td><td>'+(g.r==="no"?"–":g.c)+'</td></tr>';
+ }).join("");
+ var yes=0,maybe=0,head=0;
+ guests.forEach(function(g){if(g.r==="yes"){yes++;head+=g.c}if(g.r==="maybe")maybe++});
+ document.getElementById("sYes").textContent=yes;
+ document.getElementById("sMaybe").textContent=maybe;
+ document.getElementById("sHead").textContent=head;
+}
+document.getElementById("rsvpForm").addEventListener("submit",function(e){
+ e.preventDefault();
+ var name=document.getElementById("gname").value.trim();
+ var th=document.getElementById("thanks");
+ if(!name){th.style.color="var(--bad)";th.textContent=T[lang].need;return}
+ var resp=document.querySelector('input[name="resp"]:checked').value;
+ var c=Math.max(1,Math.min(20,parseInt(document.getElementById("gcount").value,10)||1));
+ guests.unshift({n:name,r:resp,c:c});
+ var v=document.getElementById("sViews");v.textContent=(parseInt(v.textContent.replace(/,/g,""),10)+1).toLocaleString("en-IN");
+ renderRows();
+ th.style.color="var(--ok)";th.textContent=T[lang].thanks.replace("{n}",name);
+ document.getElementById("gname").value="";
+});
+document.getElementById("copyCsv").addEventListener("click",function(){
+ var csv="name,reply,people\n"+guests.map(function(g){return '"'+g.n.replace(/"/g,'""')+'",'+g.r+','+g.c}).join("\n");
+ var note=document.getElementById("csvNote");
+ function fail(){note.textContent=T[lang].csvfail}
+ try{navigator.clipboard.writeText(csv).then(function(){note.textContent=T[lang].csvok},fail)}catch(err){fail()}
+});
+window.NM={designs:designs,art:art,cats:cats};
+applyLang("en");
+})();
+</script>
+<script>
+(function(){
+var SHARE="https://claude.ai/artifact/43QjKGtv2vHgRuZqLbfMb4";
+var CAP={ready:false,db:null,uid:null,canEdit:false,dl:null};
+var unsubs=[],S={invites:[],rsvps:[],views:[],sel:null,draft:null,init:false,viewed:null,loaded:false};
+var cur="";
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function use(n){try{return window.claude&&window.claude.use?window.claude.use(n):Promise.resolve(null)}catch(e){return Promise.resolve(null)}}
+function newId(){return "x"+Math.random().toString(36).slice(2,8)}
+function dkey(d){var m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(dd<10?"0":"")+dd}
+function clone(o){return JSON.parse(JSON.stringify(o))}
+function show(v){["viewHome","viewStudio","viewGuest"].forEach(function(id){$(id).hidden=(id!==v)})}
+function clearSubs(){unsubs.forEach(function(u){try{u()}catch(e){}});unsubs=[]}
+function designBy(name){var D=window.NM.designs;for(var i=0;i<D.length;i++)if(D[i].n===name)return D[i];return D[0]}
+function catLabel(id,l){var c=window.NM.cats.filter(function(x){return x.id===id})[0];return c?c[l]||c.en:""}
+function csvCell(v){v=String(v==null?"":v);if(/^[=+\-@\t\r]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"'}
+function data(snap){return snap.data()||{}}
+
+/* ---------- guest strings ---------- */
+var G={
+en:{inv:"You are invited",h:"Will you join us?",name:"Your name",reply:"Your reply",yes:"Joyfully yes",maybe:"Maybe",no:"Sadly no",guests:"Guests",note:"A blessing or note for the hosts (optional)",send:"Send my reply",update:"Update my reply",thanks:"Thank you, {n}! Your reply has been sent.",need:"Please enter your name.",fail:"Your reply could not be saved. Check that you have access to this page and try again.",nologin:"Sign in to Claude to open this invitation.",noid:"Sign in to Claude to send a reply.",missing:"This invitation could not be found.",loading:"Opening your invitation…",prev:"Your current reply: ",foot:"Made with Nimantran"},
+hi:{inv:"आप आमंत्रित हैं",h:"क्या आप आएँगे?",name:"आपका नाम",reply:"आपका जवाब",yes:"खुशी से हाँ",maybe:"शायद",no:"खेद है, नहीं",guests:"मेहमान",note:"मेज़बान के लिए शुभकामना या संदेश (वैकल्पिक)",send:"जवाब भेजें",update:"जवाब बदलें",thanks:"धन्यवाद, {n}! आपका जवाब भेज दिया गया।",need:"कृपया अपना नाम लिखें।",fail:"आपका जवाब सहेजा नहीं जा सका। जाँचें कि आपके पास इस पेज की पहुँच है और फिर कोशिश करें।",nologin:"निमंत्रण खोलने के लिए Claude में साइन इन करें।",noid:"जवाब भेजने के लिए Claude में साइन इन करें।",missing:"यह निमंत्रण नहीं मिला।",loading:"आपका निमंत्रण खुल रहा है…",prev:"आपका मौजूदा जवाब: ",foot:"Nimantran से बना"},
+mr:{inv:"तुम्हाला आमंत्रण आहे",h:"तुम्ही याल का?",name:"तुमचे नाव",reply:"तुमचे उत्तर",yes:"आनंदाने हो",maybe:"कदाचित",no:"क्षमस्व, नाही",guests:"पाहुणे",note:"यजमानांसाठी शुभेच्छा किंवा संदेश (ऐच्छिक)",send:"उत्तर पाठवा",update:"उत्तर बदला",thanks:"धन्यवाद, {n}! तुमचे उत्तर पाठवले गेले.",need:"कृपया तुमचे नाव लिहा.",fail:"तुमचे उत्तर जतन होऊ शकले नाही. या पानाचा अॅक्सेस आहे का ते तपासा आणि पुन्हा प्रयत्न करा.",nologin:"आमंत्रण उघडण्यासाठी Claude मध्ये साइन इन करा.",noid:"उत्तर पाठवण्यासाठी Claude मध्ये साइन इन करा.",missing:"हे आमंत्रण सापडले नाही.",loading:"तुमचे आमंत्रण उघडत आहे…",prev:"तुमचे सध्याचे उत्तर: ",foot:"Nimantran ने बनवलेले"}
+};
+
+/* ---------- routing ---------- */
+function route(){
+ var h=location.hash,type=h==="#studio"?"studio":(/^#i-[a-z0-9]+$/i.test(h)?"guest":"home");
+ var key=type+(type==="guest"?h:"")+(CAP.ready?"1":"0");
+ if(key===cur)return;
+ cur=key;clearSubs();S.init=false;S.loaded=false;
+ if(type==="studio"){show("viewStudio");window.scrollTo(0,0);studioEnter()}
+ else if(type==="guest"){show("viewGuest");window.scrollTo(0,0);guestEnter(h.slice(3))}
+ else{show("viewHome");if(h==="#home"||h==="")window.scrollTo(0,0)}
+}
+window.addEventListener("hashchange",route);
+
+/* ---------- studio ---------- */
+function studioEnter(){
+ var el=$("studioBody");
+ if(!CAP.ready){el.innerHTML='<p class="note">Loading…</p>';return}
+ if(!CAP.db||!CAP.canEdit){
+  el.innerHTML='<div class="panel"><h3>Host studio</h3><p>Only the host of this page can open the studio. If you received an invitation link, open that link instead.</p></div>';return}
+ var D=window.NM.designs,C=window.NM.cats;
+ el.innerHTML='<div class="studio"><aside class="panel"><h3>Your invitations</h3><div class="ilist" id="ilist"><p class="note">Loading…</p></div><button class="btn small" id="newInv" type="button">New invitation</button></aside>'+
+ '<div class="stack"><form class="panel" id="edForm" novalidate><h3 id="edTitle">Invitation details</h3><div class="fgrid">'+
+ '<div class="field"><label for="e_n1">Name</label><input type="text" id="e_n1" autocomplete="off"></div>'+
+ '<div class="field"><label for="e_n2">Second name (optional)</label><input type="text" id="e_n2" autocomplete="off"></div>'+
+ '<div class="field"><label for="e_occ">Occasion</label><select id="e_occ">'+C.map(function(c){return '<option value="'+c.id+'">'+esc(c.en)+'</option>'}).join("")+'</select></div>'+
+ '<div class="field"><label for="e_lang">Invitation language</label><select id="e_lang"><option value="en">English</option><option value="hi">हिन्दी</option><option value="mr">मराठी</option></select></div>'+
+ '<div class="field"><label for="e_date">Date</label><input type="text" id="e_date" autocomplete="off"></div>'+
+ '<div class="field"><label for="e_time">Time</label><input type="text" id="e_time" autocomplete="off"></div></div>'+
+ '<div class="field"><label for="e_venue">Venue</label><input type="text" id="e_venue" autocomplete="off"></div>'+
+ '<div class="field"><label for="e_msg">Message to guests</label><textarea id="e_msg"></textarea></div>'+
+ '<div class="field"><label for="e_design">Design</label><div class="prevrow"><div class="art" id="e_prev"></div><select id="e_design">'+D.map(function(d){return '<option>'+esc(d.n)+'</option>'}).join("")+'</select></div></div>'+
+ '<div class="row-actions"><button class="btn" type="submit">Save invitation</button><button class="btn ghost small" type="button" id="delInv" hidden>Delete invitation</button><span class="note" id="edStatus" role="status"></span></div></form>'+
+ '<div class="panel" id="shareBox"></div><div class="panel" id="dash"></div></div></div>';
+ $("e_design").addEventListener("change",function(){$("e_prev").innerHTML=window.NM.art(designBy($("e_design").value))});
+ $("newInv").addEventListener("click",function(){fillForm(null,null)});
+ $("edForm").addEventListener("submit",saveInvite);
+ $("delInv").addEventListener("click",delInvite);
+ fillForm(null,null);
+ var t=setTimeout(function(){if(!S.loaded){var l=$("ilist");if(l)l.innerHTML='<p class="note err">Cannot reach saved invitations yet. Check your connection.</p>'}},10000);
+ unsubs.push(function(){clearTimeout(t)});
+ function sub(coll,key){
+  unsubs.push(CAP.db.collection(coll).onSnapshot(function(snap){S[key]=snap.docs;if(key==="invites")S.loaded=true;afterData()},function(err){var l=$("ilist");if(l&&key==="invites")l.innerHTML='<p class="note err">Could not load invitations ('+esc(err&&err.code)+').</p>'}));
+ }
+ sub("invites","invites");sub("rsvps","rsvps");sub("views","views");
+}
+function afterData(){
+ if(!S.init&&S.loaded){
+  S.init=true;
+  var first=S.invites.slice().sort(function(a,b){return String(data(b).created).localeCompare(String(data(a).created))})[0];
+  if(first)fillForm(data(first),first.id);
+ }
+ renderList();renderShare();renderDash();
+}
+function fillForm(inv,id){
+ S.sel=id;S.draft=id?null:newId();
+ var d=inv||{n1:"Meera",n2:"Kabir",occ:"wedding",lang:"en",date:"14 February 2027",time:"7:30 PM",venue:"City Palace, Udaipur",msg:"With the blessings of our families, we invite you to celebrate with us.",design:window.NM.designs[0].n};
+ ["n1","n2","date","time","venue","msg"].forEach(function(k){$("e_"+k).value=d[k]||""});
+ $("e_occ").value=d.occ||"wedding";$("e_lang").value=d.lang||"en";$("e_design").value=d.design||window.NM.designs[0].n;
+ $("e_prev").innerHTML=window.NM.art(designBy($("e_design").value));
+ $("edTitle").textContent=id?"Edit invitation":"New invitation";
+ $("delInv").hidden=!id;$("delInv").textContent="Delete invitation";
+ $("edStatus").textContent=id?"":"Example details. Change them, then save.";
+ renderList();renderShare();renderDash();
+}
+function saveInvite(e){
+ e.preventDefault();
+ var st=$("edStatus"),n1=$("e_n1").value.trim();
+ if(!n1){st.className="note err";st.textContent="Enter at least one name.";return}
+ var id=S.sel||S.draft,old=S.invites.filter(function(x){return x.id===id})[0];
+ var obj={n1:n1,n2:$("e_n2").value.trim(),occ:$("e_occ").value,lang:$("e_lang").value,date:$("e_date").value.trim(),time:$("e_time").value.trim(),venue:$("e_venue").value.trim(),msg:$("e_msg").value.trim(),design:$("e_design").value,created:old?data(old).created:new Date().toISOString()};
+ st.className="note";st.textContent="Saving…";
+ CAP.db.doc("invites/"+id).set(obj).then(function(){
+  S.sel=id;S.draft=null;st.className="note";st.textContent="Saved. Copy the guest link below.";
+  $("edTitle").textContent="Edit invitation";$("delInv").hidden=false;renderList();renderShare();renderDash();
+ }).catch(function(err){st.className="note err";st.textContent="Could not save ("+esc(err&&err.code)+"). Only editors can save invitations."});
+}
+var delTimer=null;
+function delInvite(){
+ var b=$("delInv");
+ if(b.dataset.arm!=="1"){b.dataset.arm="1";b.textContent="Click again to delete";clearTimeout(delTimer);delTimer=setTimeout(function(){b.dataset.arm="";b.textContent="Delete invitation"},4000);return}
+ var id=S.sel;if(!id)return;
+ CAP.db.doc("invites/"+id).delete().then(function(){fillForm(null,null);$("edStatus").textContent="Invitation deleted."}).catch(function(){$("edStatus").className="note err";$("edStatus").textContent="Could not delete."});
+ b.dataset.arm="";
+}
+function renderList(){
+ var l=$("ilist");if(!l)return;
+ var arr=S.invites.slice().sort(function(a,b){return String(data(b).created).localeCompare(String(data(a).created))});
+ if(!arr.length){l.innerHTML='<p class="note">No saved invitations yet. Save the example on the right to create your first one.</p>';return}
+ l.innerHTML=arr.map(function(s){var d=data(s);return '<button type="button" class="iitem" data-id="'+esc(s.id)+'" aria-current="'+(s.id===S.sel)+'">'+esc(d.n1)+(d.n2?" & "+esc(d.n2):"")+'<small>'+esc(catLabel(d.occ,"en"))+(d.date?" · "+esc(d.date):"")+'</small></button>'}).join("");
+ l.querySelectorAll(".iitem").forEach(function(b){b.addEventListener("click",function(){var s=S.invites.filter(function(x){return x.id===b.dataset.id})[0];if(s)fillForm(data(s),s.id)})});
+}
+function renderShare(){
+ var b=$("shareBox");if(!b)return;
+ if(!S.sel){b.innerHTML='<h3>Guest link</h3><p class="note">Save the invitation to get its link.</p>';return}
+ var url=SHARE+"#i-"+S.sel;
+ b.innerHTML='<h3>Guest link</h3><div class="linkbox"><code id="lnk">'+esc(url)+'</code><button class="btn small" id="cpLink" type="button">Copy link</button><a class="btn ghost small" href="'+esc(url)+'">Open guest view</a></div><p class="note" id="lnkNote" role="status">Guests need access to this page. In Share, give them Contributor access (people with the link can use the page) so their replies can be saved.</p>';
+ $("cpLink").addEventListener("click",function(){
+  var n=$("lnkNote");
+  function fail(){n.textContent="Copy was blocked here. Select the link and copy it.";var r=document.createRange();r.selectNodeContents($("lnk"));var s=getSelection();s.removeAllRanges();s.addRange(r)}
+  try{navigator.clipboard.writeText(url).then(function(){n.textContent="Link copied."},fail)}catch(err){fail()}
+ });
+}
+function repliesFor(id){
+ var out=[];
+ S.rsvps.forEach(function(s){var d=data(s),r=d.replies&&d.replies[id];if(r)out.push({name:d.name||"Guest",resp:r.resp,count:r.count||1,note:r.note||"",at:r.at||""})});
+ return out.sort(function(a,b){return String(b.at).localeCompare(String(a.at))});
+}
+function renderDash(){
+ var el=$("dash");if(!el)return;
+ var id=S.sel;
+ if(!id){el.innerHTML='<h3>Views and replies</h3><p class="note">Save an invitation to start tracking who opens it and who replies.</p>';return}
+ var uniq=0,total=0,last="",days=[],i,k;
+ for(i=6;i>=0;i--){var dt=new Date();dt.setDate(dt.getDate()-i);days.push({k:dkey(dt),l:dt.toLocaleDateString("en-IN",{weekday:"short"}).slice(0,1),n:0})}
+ S.views.forEach(function(s){var d=data(s),c=d.counts&&d.counts[id];if(c){uniq++;total+=c}
+  if(d.last&&d.last[id]&&String(d.last[id])>last)last=d.last[id];
+  if(d.days&&d.days[id])days.forEach(function(x){x.n+=d.days[id][x.k]||0})});
+ var rep=repliesFor(id),yes=0,maybe=0,no=0,head=0;
+ rep.forEach(function(r){if(r.resp==="yes"){yes++;head+=r.count}else if(r.resp==="maybe")maybe++;else no++});
+ var mx=Math.max.apply(null,days.map(function(x){return x.n}).concat([1]));
+ var rows=rep.length?rep.map(function(r){return '<tr><td>'+esc(r.name)+'</td><td><span class="tag '+esc(r.resp)+'">'+({yes:"Coming",maybe:"Maybe",no:"Can't"}[r.resp]||esc(r.resp))+'</span></td><td>'+(r.resp==="no"?"–":r.count)+'</td><td>'+esc(r.note)+'</td></tr>'}).join(""):'<tr><td colspan="4" class="note">No replies yet. Share the link to start collecting them.</td></tr>';
+ el.innerHTML='<h3>Views and replies</h3><div class="stats"><div class="stat"><b>'+uniq+'</b><span>guests opened</span></div><div class="stat"><b>'+total+'</b><span>views</span></div><div class="stat"><b>'+yes+'</b><span>coming ('+head+' people)</span></div><div class="stat"><b>'+maybe+'</b><span>maybe</span></div></div>'+
+ '<div class="spark" aria-hidden="true">'+days.map(function(x){return '<i style="height:'+Math.max(4,Math.round(x.n/mx*100))+'%"></i>'}).join("")+'</div><div class="days" aria-hidden="true">'+days.map(function(x){return '<span>'+esc(x.l)+'</span>'}).join("")+'</div>'+
+ '<p class="note">'+(last?'Last opened '+esc(new Date(last).toLocaleString("en-IN")):'Not opened by a guest yet.')+' Your own views are not counted.</p>'+
+ '<div class="tbl"><table><thead><tr><th>Guest</th><th>Reply</th><th>People</th><th>Note</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+ '<div class="row-actions"><button class="btn ghost small" id="dlCsv" type="button"'+(CAP.dl?'':' hidden')+'>Download CSV</button><button class="btn ghost small" id="cpCsv" type="button">Copy CSV</button><span class="note" id="csvMsg" role="status"></span></div>';
+ var csv="name,reply,people,note,replied_at\n"+rep.map(function(r){return [r.name,r.resp,r.resp==="no"?0:r.count,r.note,r.at].map(csvCell).join(",")}).join("\n");
+ var msg=$("csvMsg");
+ $("cpCsv").addEventListener("click",function(){try{navigator.clipboard.writeText(csv).then(function(){msg.textContent="Copied."},function(){msg.textContent="Copy was blocked here. Use Download CSV."})}catch(e){msg.textContent="Copy was blocked here. Use Download CSV."}});
+ if(CAP.dl)$("dlCsv").addEventListener("click",function(){CAP.dl.save({filename:"guest-list.csv",data:csv}).then(function(){msg.textContent="Saved."},function(err){msg.textContent=err&&err.code==="declined"?"Download cancelled.":"Download is not available here. Use Copy CSV."})});
+}
+
+/* ---------- guest ---------- */
+function guestEnter(id){
+ var el=$("guestBody"),mykey=cur;
+ function note(t,cls){el.innerHTML='<p class="note '+(cls||"")+'" style="text-align:center;margin-top:3rem">'+esc(t)+'</p>'}
+ if(!CAP.ready){note(G.en.loading);return}
+ if(!CAP.db){note(G.en.nologin);return}
+ var done=false,t=setTimeout(function(){if(!done&&cur===mykey)note("This invitation cannot be reached yet. Check your connection and reload.","err")},10000);
+ CAP.db.doc("invites/"+id).get().then(function(snap){
+  done=true;clearTimeout(t);if(cur!==mykey)return;
+  if(!snap.exists){note(G.en.missing);return}
+  renderGuest(id,snap.data());
+ }).catch(function(){done=true;clearTimeout(t);if(cur===mykey)note(G.en.missing)});
+}
+function recordView(id){
+ if(!CAP.uid||CAP.canEdit||S.viewed===id)return;S.viewed=id;
+ var ref=CAP.db.doc("views/"+CAP.uid);
+ ref.get().then(function(s){
+  var d=s.exists?clone(s.data()):{};
+  d.counts=d.counts||{};d.days=d.days||{};d.last=d.last||{};d.days[id]=d.days[id]||{};
+  var k=dkey(new Date());d.counts[id]=(d.counts[id]||0)+1;d.days[id][k]=(d.days[id][k]||0)+1;d.last[id]=new Date().toISOString();
+  return ref.set(d);
+ }).catch(function(){});
+}
+function renderGuest(id,inv){
+ var l=G[inv.lang]?inv.lang:"en",g=G[l],d=designBy(inv.design),el=$("guestBody"),mykey=cur;
+ var svg=window.NM.art(d,true).replace('viewBox="0 0 300 400"','viewBox="20 40 260 230"');
+ var when=[inv.date,inv.time].filter(Boolean).join(" · ");
+ el.innerHTML='<div class="gwrap"><article class="gcard" style="background:'+esc(d.a)+';color:'+esc(d.b)+';border-color:'+esc(d.b)+'"><div class="gart">'+svg+'</div><div class="gin">'+
+ '<p class="gk">'+esc(g.inv)+'</p><h1 class="gn">'+esc(inv.n1)+'</h1>'+(inv.n2?'<div class="gamp">&amp;</div><h1 class="gn">'+esc(inv.n2)+'</h1>':'')+
+ '<p>'+esc(catLabel(inv.occ,l))+'</p>'+(when?'<p class="gwhen">'+esc(when)+'</p>':'')+(inv.venue?'<p>'+esc(inv.venue)+'</p>':'')+(inv.msg?'<p class="gmsg">'+esc(inv.msg)+'</p>':'')+
+ '</div><div class="door l"><i></i></div><div class="door r"><i></i></div></article>'+
+ '<form class="panel" id="gForm" novalidate><h3>'+esc(g.h)+'</h3>'+
+ '<div class="field"><label for="g_name">'+esc(g.name)+'</label><input type="text" id="g_name" autocomplete="name"></div>'+
+ '<div class="field"><label id="g_lbl">'+esc(g.reply)+'</label><div class="choices" role="radiogroup" aria-labelledby="g_lbl"><input type="radio" name="gresp" id="g-yes" value="yes" checked><label for="g-yes">'+esc(g.yes)+'</label><input type="radio" name="gresp" id="g-maybe" value="maybe"><label for="g-maybe">'+esc(g.maybe)+'</label><input type="radio" name="gresp" id="g-no" value="no"><label for="g-no">'+esc(g.no)+'</label></div></div>'+
+ '<div class="field"><label for="g_count">'+esc(g.guests)+'</label><input type="number" id="g_count" min="1" max="20" value="1"></div>'+
+ '<div class="field"><label for="g_note">'+esc(g.note)+'</label><textarea id="g_note" maxlength="300"></textarea></div>'+
+ '<button class="btn" id="g_send" type="submit">'+esc(g.send)+'</button><div class="thanks" id="g_msg" role="status"></div></form>'+
+ '<p class="gfoot">'+esc(g.foot)+'</p></div>';
+ var form=$("gForm"),msg=$("g_msg");
+ if(!CAP.uid){msg.className="thanks err";msg.textContent=g.noid;$("g_send").disabled=true}
+ else{
+  recordView(id);
+  CAP.db.doc("rsvps/"+CAP.uid).get().then(function(s){
+   if(cur!==mykey||!s.exists)return;var x=s.data(),r=x.replies&&x.replies[id];
+   if(x.name)$("g_name").value=x.name;
+   if(r){var rb=form.querySelector('input[name="gresp"][value="'+r.resp+'"]');if(rb)rb.checked=true;$("g_count").value=r.count||1;$("g_note").value=r.note||"";$("g_send").textContent=g.update;msg.className="thanks";msg.style.color="var(--muted)";msg.textContent=g.prev+({yes:g.yes,maybe:g.maybe,no:g.no}[r.resp]||"")}
+  }).catch(function(){});
+ }
+ form.addEventListener("submit",function(e){
+  e.preventDefault();msg.style.color="";
+  var name=$("g_name").value.trim();
+  if(!name){msg.className="thanks err";msg.textContent=g.need;return}
+  if(!CAP.uid)return;
+  var resp=form.querySelector('input[name="gresp"]:checked').value,c=Math.max(1,Math.min(20,parseInt($("g_count").value,10)||1)),note=$("g_note").value.trim().slice(0,300);
+  var ref=CAP.db.doc("rsvps/"+CAP.uid),btn=$("g_send");btn.disabled=true;
+  ref.get().then(function(s){
+   var x=s.exists?clone(s.data()):{};x.replies=x.replies||{};x.name=name;
+   x.replies[id]={resp:resp,count:c,note:note,at:new Date().toISOString()};
+   return ref.set(x);
+  }).then(function(){msg.className="thanks";msg.textContent=g.thanks.replace("{n}",name);btn.textContent=g.update;btn.disabled=false})
+  .catch(function(){msg.className="thanks err";msg.textContent=g.fail;btn.disabled=false});
+ });
+}
+
+/* ---------- boot ---------- */
+route();
+Promise.all([use("user"),use("db"),use("downloads")]).then(function(r){
+ var user=r[0];CAP.db=r[1];CAP.dl=r[2];
+ return Promise.resolve(user?user.id():null).then(function(id){CAP.uid=id;return user?user.canEdit():false}).then(function(ce){CAP.canEdit=!!ce});
+}).catch(function(){}).then(function(){CAP.ready=true;route()});
+})();
+</script>
