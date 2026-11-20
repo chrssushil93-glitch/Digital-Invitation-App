@@ -23,6 +23,7 @@ export default function InviteCard({ inv, lang, hideText = false }: { inv: Invit
           <img className="ly couple" src={`${base}/couple.webp`} alt="" />
           <img className="ly hl" src={`${base}/left.webp`} alt="" />
           <img className="ly hr" src={`${base}/right.webp`} alt="" />
+          <img className="ly chand" src="/scenes/chandelier.webp" alt="" />
           {/* eslint-enable @next/next/no-img-element */}
           {!hideText && (
             <>

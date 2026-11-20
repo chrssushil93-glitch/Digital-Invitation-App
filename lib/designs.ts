@@ -1,11 +1,11 @@
 export type Motif = "lotus" | "arch" | "sun" | "moon";
 export type Scene = "portico" | "garden";
-export type Design = { n: string; c: string; p: number; a: string; b: string; m: Motif; s?: Scene };
+export type Design = { n: string; c: string; p: number; a: string; b: string; m: Motif; s?: Scene; o?: "wood" | "gate" };
 export type Lang = "en" | "hi" | "mr";
 
 export const designs: Design[] = [
-  { n: "Royal Portico", c: "wedding", p: 499, a: "#fbf1e3", b: "#5a1022", m: "arch", s: "portico" },
-  { n: "Garden Dance", c: "wedding", p: 499, a: "#fbf1e3", b: "#5a1022", m: "lotus", s: "garden" },
+  { n: "Royal Portico", c: "wedding", p: 499, a: "#fbf1e3", b: "#5a1022", m: "arch", s: "portico", o: "gate" },
+  { n: "Garden Dance", c: "wedding", p: 499, a: "#fbf1e3", b: "#5a1022", m: "lotus", s: "garden", o: "wood" },
   { n: "Lotus Court", c: "engagement", p: 99, a: "#6b1428", b: "#e9d3a0", m: "lotus" },
   { n: "Peacock Night", c: "wedding", p: 399, a: "#0f4c4a", b: "#d9ac55", m: "arch" },
   { n: "Marigold Morning", c: "wedding", p: 399, a: "#c9791b", b: "#fff0c9", m: "sun" },

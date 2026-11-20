@@ -43,3 +43,11 @@ Import the repository, add the environment variables from `.env.example`, and de
 ## Not built yet
 
 Payments and pricing checkout, more designs and languages, the Monday email report, video and PDF export, and rate limiting on the guest endpoints.
+
+
+## 3D model credits (CC BY 4.0)
+- Old wooden Door by Ellie3D (Sketchfab)
+- Reja by e-restrepo1114 (Sketchfab)
+- 700511 Classic Osgona chandelier by LIGHTSTAR GROUP (Sketchfab)
+
+Original uploads live in `source-assets/`; only optimised copies ship from `public/`.

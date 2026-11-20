@@ -127,8 +127,9 @@ footer.sitefoot{border-top:1px solid var(--line);margin-top:2rem;padding-block:1
 .scene .hl{left:0;transform-origin:20% 0}
 .scene .hr{right:0;transform-origin:80% 0}
 .stxt{position:absolute;left:12%;right:12%;text-align:center;display:grid;justify-items:center;gap:0;color:#5a1022;text-shadow:0 0 .6em rgba(255,246,232,.9),0 0 .2em rgba(255,246,232,.8)}
-.scene-portico .stxt{top:14%}
-.scene-garden .stxt{top:15%}
+.scene .chand{left:35%;width:30%;top:0;transform-origin:50% 0;animation:sceneDrop 1.4s cubic-bezier(.2,.7,.2,1) .2s both,swing 5s ease-in-out 1.6s infinite alternate}
+.scene-portico .stxt{top:21%}
+.scene-garden .stxt{top:22%}
 .stxt .gk{font-family:var(--serif);font-weight:600;font-size:max(.58rem,2.8cqw);letter-spacing:.24em;margin-bottom:.4em}
 .sname{font-family:var(--script);font-weight:400;font-size:clamp(1.8rem,14cqw,4.4rem);line-height:1.05;margin:0;overflow-wrap:anywhere;text-wrap:balance}
 .samp{font-family:var(--serif);font-size:clamp(1rem,5cqw,1.6rem);line-height:1}
@@ -144,6 +145,7 @@ footer.sitefoot{border-top:1px solid var(--line);margin-top:2rem;padding-block:1
 @keyframes sceneDrop{from{opacity:0;transform:translateY(-5%)}}
 @keyframes sceneRise{from{opacity:0;transform:translateY(5%)}}
 @keyframes sceneFade{from{opacity:0}}
+@keyframes swing{from{transform:rotate(-1.6deg)}to{transform:rotate(1.6deg)}}
 @keyframes sway{from{transform:rotate(-.7deg)}to{transform:rotate(.7deg)}}
 .scene .hl,.scene .hr{animation:sceneDrop 1.4s cubic-bezier(.2,.7,.2,1) both,sway 6s ease-in-out 1.4s infinite alternate}
 .scene .hr{animation-delay:.15s,1.6s}
@@ -151,4 +153,4 @@ footer.sitefoot{border-top:1px solid var(--line);margin-top:2rem;padding-block:1
 .stxt{animation:sceneFade 1.4s ease .8s both}
 .music{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:20;width:46px;height:46px;border-radius:50%;
   border:1.5px solid var(--gold);background:var(--maroon);color:var(--on-maroon);font-size:1.3rem;line-height:1;cursor:pointer;display:grid;place-items:center}
-@media (prefers-reduced-motion: reduce){.scene .hl,.scene .hr,.scene .couple,.stxt{animation:none}}
+@media (prefers-reduced-motion: reduce){.scene .hl,.scene .hr,.scene .couple,.scene .chand,.stxt{animation:none}}
