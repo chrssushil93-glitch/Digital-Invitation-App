@@ -6,6 +6,7 @@ import GuestForm from "@/components/GuestForm";
 import DoorReveal from "@/components/DoorReveal";
 import InviteCard from "@/components/InviteCard";
 import DoorCredit from "@/components/DoorCredit";
+import MusicPlayer from "@/components/MusicPlayer";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,7 @@ export default async function GuestPage({ params }: { params: { slug: string } }
   return (
     <div className="wrap">
       <div className="gwrap">
+        <MusicPlayer src="/audio/wedding-music.mp3" on="Play music" off="Mute music" />
         <DoorReveal hint={g.tap}>
           <InviteCard inv={inv} lang={lang} />
         </DoorReveal>

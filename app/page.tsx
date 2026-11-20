@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { artSvg, catLabel, designs } from "@/lib/designs";
+import DoorReveal from "@/components/DoorReveal";
+import InviteCard from "@/components/InviteCard";
+import DoorCredit from "@/components/DoorCredit";
 
 export default function Home() {
   return (
@@ -25,8 +28,12 @@ export default function Home() {
             <a className="btn ghost" href="#designs">Browse designs</a>
           </div>
         </div>
-        <div className="art" style={{ maxWidth: 340, justifySelf: "center", width: "100%" }}
-          dangerouslySetInnerHTML={{ __html: artSvg(designs[0]) }} />
+        <div style={{ maxWidth: 400, justifySelf: "center", width: "100%" }}>
+          <DoorReveal hint="Tap to open" replayLabel="Replay the doors" autoOpenMs={2600}>
+            <InviteCard lang="en" inv={{ n1: "Meera", n2: "Kabir", occ: "wedding", date_text: "14 February 2027", time_text: "7:30 PM",
+              venue: "City Palace, Udaipur", msg: "With the blessings of our families, we invite you to celebrate with us.", design: designs[0].n }} />
+          </DoorReveal>
+        </div>
       </div>
 
       <section className="block" id="designs">
@@ -53,6 +60,7 @@ export default function Home() {
           <div><h3>A guest list for the caterer</h3><p>Every reply in one list with head-counts. Download it as CSV for Excel or Sheets.</p></div>
         </div>
       </section>
+      <footer className="sitefoot"><DoorCredit /></footer>
     </div>
   );
 }

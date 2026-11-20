@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 
 type Phase = "loading" | "closed" | "opening" | "revealed" | "done" | "skip";
 
+const DOOR_YAW = Math.PI / 2;
 const MODEL_URL = "/models/old-wooden-door/scene.gltf";
 
 /**
@@ -140,20 +141,7 @@ export default function DoorReveal({
         }
 
         const model = gltf.scene;
-        const box = new THREE.Box3().setFromObject(model);
-        const size = box.getSize(new THREE.Vector3());
-        const center = box.getCenter(new THREE.Vector3());
-        model.position.sub(center);
-        const pivot = new THREE.Group();
-        pivot.add(model);
-        const s = 2 / size.y;
-        pivot.scale.setScalar(s);
-        scene.add(pivot);
-        modelW = size.x * s;
-        modelH = 2;
-        glow.position.z = -(size.z * s) / 2 - 0.05;
-        fit();
-
+        // Pose the skinned leaves first, so the bounds describe what is actually drawn.
         const mixer = new THREE.AnimationMixer(model);
         const clip = gltf.animations[0];
         const action = clip ? mixer.clipAction(clip) : null;
@@ -164,6 +152,23 @@ export default function DoorReveal({
           action.paused = true;
           mixer.update(0);
         }
+        model.updateMatrixWorld(true);
+        model.traverse((o) => { const sk = o as import("three").SkinnedMesh; if (sk.isSkinnedMesh) { sk.skeleton.update(); sk.computeBoundingBox(); } });
+        const box = new THREE.Box3().setFromObject(model, true);
+        const size = box.getSize(new THREE.Vector3());
+        const center = box.getCenter(new THREE.Vector3());
+        console.info("door bounds", size.toArray(), center.toArray());
+        model.position.sub(center);
+        const pivot = new THREE.Group();
+        pivot.add(model);
+        const s = 2 / size.y;
+        pivot.scale.setScalar(s);
+        pivot.rotation.y = DOOR_YAW; // the model is authored facing sideways
+        scene.add(pivot);
+        modelW = size.z * s;
+        modelH = 2;
+        glow.position.z = -(size.x * s) / 2 - 0.05;
+        fit();
 
         let opened = false;
         const startDolly = () => {
@@ -171,6 +176,7 @@ export default function DoorReveal({
         };
         mixer.addEventListener("finished", startDolly);
         const open = () => {
+          window.dispatchEvent(new Event("nm-open"));
           if (opened || disposed) return;
           opened = true;
           setPhase("opening");
