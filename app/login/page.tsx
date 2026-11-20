@@ -1,9 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { browserClient } from "@/lib/supabase/browser";
 
 export default function Login() {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => { setFailed(new URLSearchParams(window.location.search).has("error")); }, []);
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [msg, setMsg] = useState("");
@@ -13,11 +14,13 @@ export default function Login() {
     if (!email.trim()) return;
     setState("sending");
     try {
-      const { error } = await browserClient().auth.signInWithOtp({
-        email: email.trim(),
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      const res = await fetch("/api/auth/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
       });
-      if (error) throw error;
+      const data = (await res.json()) as { ok: boolean; error?: string };
+      if (!data.ok) throw new Error(data.error ?? "Could not send the sign-in link.");
       setState("sent");
     } catch (err) {
       setState("error");
@@ -40,8 +43,8 @@ export default function Login() {
         <button className="btn" type="submit" disabled={state === "sending"}>
           {state === "sending" ? "Sending…" : "Email me a link"}
         </button>
-        <p role="status" className={state === "error" ? "note err" : "note okmsg"} style={{ marginTop: ".8rem" }}>
-          {state === "sent" ? "Check your inbox for the sign-in link." : state === "error" ? msg : ""}
+        <p role="status" className={state === "error" || (failed && state === "idle") ? "note err" : "note okmsg"} style={{ marginTop: ".8rem" }}>
+          {state === "sent" ? "Check your inbox for the sign-in link." : state === "error" ? msg : failed ? "That sign-in link did not work or has expired. Please request a new one." : ""}
         </p>
       </form>
     </div>
