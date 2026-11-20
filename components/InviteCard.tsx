@@ -25,21 +25,21 @@ export default function InviteCard({ inv, lang, hideText = false }: { inv: Invit
           <img className="ly hr" src={`${base}/right.webp`} alt="" />
           {/* eslint-enable @next/next/no-img-element */}
           {!hideText && (
-            <div className="stxt">
-              <p className="gk">{g.inv}</p>
-              <h1 className="sname">{inv.n1}</h1>
-              {inv.n2 && (<><div className="samp">&amp;</div><h1 className="sname">{inv.n2}</h1></>)}
-              <p className="socc">{catLabel(inv.occ, lang)}</p>
-            </div>
+            <>
+              <div className="stxt">
+                <p className="gk">{g.inv}</p>
+                <h1 className="sname">{inv.n1}</h1>
+                {inv.n2 && (<><div className="samp">&amp;</div><h1 className="sname">{inv.n2}</h1></>)}
+                <p className="socc">{catLabel(inv.occ, lang)}</p>
+              </div>
+              <div className="sdet">
+                {when && <p className="gwhen">{when}</p>}
+                {inv.venue && <p className="svenue">{inv.venue}</p>}
+                {inv.msg && <p className="gmsg">{inv.msg}</p>}
+              </div>
+            </>
           )}
         </div>
-        {!hideText && (
-          <div className="gin">
-            {when && <p className="gwhen">{when}</p>}
-            {inv.venue && <p>{inv.venue}</p>}
-            {inv.msg && <p className="gmsg">{inv.msg}</p>}
-          </div>
-        )}
       </article>
     );
   }

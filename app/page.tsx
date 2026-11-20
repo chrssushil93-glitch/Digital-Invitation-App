@@ -28,7 +28,7 @@ export default function Home() {
             <a className="btn ghost" href="#designs">Browse designs</a>
           </div>
         </div>
-        <div style={{ maxWidth: 400, justifySelf: "center", width: "100%" }}>
+        <div style={{ maxWidth: "min(400px, calc((100svh - 6rem) * 9 / 16))", justifySelf: "center", width: "100%" }}>
           <DoorReveal hint="Tap to open" replayLabel="Replay the doors" autoOpenMs={2600}>
             <InviteCard lang="en" inv={{ n1: "Meera", n2: "Kabir", occ: "wedding", date_text: "14 February 2027", time_text: "7:30 PM",
               venue: "City Palace, Udaipur", msg: "With the blessings of our families, we invite you to celebrate with us.", design: designs[0].n }} />
