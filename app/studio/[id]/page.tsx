@@ -28,7 +28,7 @@ export default async function EditInvite({
   searchParams,
 }: {
   params: { id: string };
-  searchParams: { saved?: string; error?: string; d?: string };
+  searchParams: { saved?: string; error?: string; d?: string; code?: string };
 }) {
   const isNew = params.id === "new";
   let invite: Invite | null = null;
@@ -58,7 +58,7 @@ export default async function EditInvite({
         status={
           <>
             {searchParams.saved && <span className="note okmsg" role="status">Saved.</span>}
-            {searchParams.error && <span className="note err" role="status">{searchParams.error === "name" ? "Enter at least one name." : "Could not save. Please try again."}</span>}
+            {searchParams.error && <span className="note err" role="status">{searchParams.error === "name" ? "Enter at least one name." : `Could not save. Please try again.${searchParams.code ? ` (code ${searchParams.code.slice(0, 12)})` : ""}`}</span>}
           </>
         }
       />

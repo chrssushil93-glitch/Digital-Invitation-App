@@ -52,7 +52,7 @@ export async function saveInvite(fd: FormData): Promise<void> {
     if (data) redirect(`/studio/${data.id}?saved=1`);
     if (error && error.code !== "23505") {
       console.error("saveInvite insert failed", error.code, error.message, error.details, error.hint);
-      break; // retry only on a slug clash
+      redirect(`/studio/new?error=save&code=${encodeURIComponent(error.code ?? "")}`);
     }
   }
   redirect("/studio/new?error=save");
