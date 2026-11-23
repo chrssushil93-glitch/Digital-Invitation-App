@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import StudioShell from "@/components/StudioShell";
+import LivePreview from "@/components/LivePreview";
 import { serverClient } from "@/lib/supabase/server";
 import { artSvg, cats, designBy, designs } from "@/lib/designs";
 import { deleteInvite, saveInvite } from "../actions";
@@ -48,7 +49,8 @@ export default async function EditInvite({
 
   return (
     <StudioShell selectedId={isNew ? "new" : params.id}>
-      <form className="panel" action={saveInvite}>
+      <div className="editgrid">
+      <form className="panel" id="invform" action={saveInvite}>
         <h3>{isNew ? "New invitation" : "Edit invitation"}</h3>
         <input type="hidden" name="id" value={isNew ? "" : d.id} />
         <div className="fgrid">
@@ -69,7 +71,6 @@ export default async function EditInvite({
             <div className="art" dangerouslySetInnerHTML={{ __html: artSvg(designBy(d.design)) }} />
             <select id="design" name="design" defaultValue={d.design}>{designs.map((x) => <option key={x.n}>{x.n}</option>)}</select>
           </div>
-          <p className="note" style={{ marginTop: ".4rem" }}>The preview updates after you save.</p>
         </div>
         <div className="row">
           <button className="btn" type="submit">Save invitation</button>
@@ -77,6 +78,13 @@ export default async function EditInvite({
           {searchParams.error && <span className="note err" role="status">{searchParams.error === "name" ? "Enter at least one name." : "Could not save. Please try again."}</span>}
         </div>
       </form>
+      <LivePreview
+        formId="invform"
+        initialLang={d.lang === "hi" || d.lang === "mr" ? d.lang : "en"}
+        initial={{ n1: d.n1, n2: d.n2, occ: d.occ, date_text: d.date_text, time_text: d.time_text, venue: d.venue, msg: d.msg, design: d.design }}
+      />
+      <a className="pvjump" href="#preview">Preview</a>
+      </div>
 
       {invite && <Share invite={invite} />}
       {invite && <Dashboard invite={invite} />}
