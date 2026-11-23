@@ -170,3 +170,33 @@ footer.sitefoot{border-top:1px solid var(--line);margin-top:2rem;padding-block:1
 .pvjump{display:none}
 @media (max-width:1040px){.editgrid{grid-template-columns:1fr}.livepv{position:static;max-width:380px;width:100%;justify-self:center}
 .pvjump{display:block;position:fixed;right:1rem;bottom:1rem;z-index:20;background:var(--maroon,#5a1022);color:#fff;text-decoration:none;padding:.7rem 1.1rem;border-radius:999px;box-shadow:0 8px 20px rgba(0,0,0,.25);font-size:.9rem}}
+
+/* Haldi Swing */
+.scene-haldi .floor{bottom:0;width:100%}
+.scene-haldi .decor{left:9%;width:82%;bottom:13%}
+.scene-haldi .couple{left:22%;width:56%;bottom:12%}
+.scene-haldi .hl,.scene-haldi .hr{top:0;width:46%}
+.scene-haldi .stxt{top:17%}
+.scene-haldi .decor{animation:sceneFade 1.2s ease .2s both}
+/* Frangipani */
+.scene-tropic{background:#f7f1e6}
+.scene-tropic .wash{display:none}
+.scene-tropic .line1{right:-14%;top:-3%;width:64%;opacity:.55}
+.scene-tropic .line2{left:-12%;bottom:-2%;width:50%;opacity:.55}
+.scene-tropic .palm1{left:-9%;top:-5%;width:40%;transform:rotate(-12deg)}
+.scene-tropic .monstera{left:-14%;top:12%;width:36%;transform:rotate(18deg)}
+.scene-tropic .fl1{left:20%;top:3%;width:15%}
+.scene-tropic .fl2{left:3%;top:17%;width:20%}
+.scene-tropic .palm2{right:-10%;bottom:4%;width:48%;transform:rotate(170deg)}
+.scene-tropic .leaf1{right:30%;bottom:2%;width:10%;transform:rotate(200deg)}
+.scene-tropic .leaf2{right:4%;bottom:26%;width:7%;transform:rotate(150deg)}
+.scene-tropic .fl3{right:6%;bottom:9%;width:22%}
+.scene-tropic .fl4{right:24%;bottom:4%;width:17%}
+.scene-tropic .stxt{top:26%;color:#2f4a3a}
+.scene-tropic .sdet{background:none}
+.scene-tropic .fl1,.scene-tropic .fl2,.scene-tropic .fl3,.scene-tropic .fl4{animation:bloom 1.2s cubic-bezier(.2,.7,.2,1) both}
+.scene-tropic .fl2{animation-delay:.15s}.scene-tropic .fl3{animation-delay:.3s}.scene-tropic .fl4{animation-delay:.45s}
+@keyframes bloom{from{opacity:0;scale:.6}}
+@media (prefers-reduced-motion: reduce){.scene-tropic [class*="fl"],.scene-haldi .decor{animation:none}}
+.scene-haldi .sdet{color:#6b3d00;background:linear-gradient(to top,#fff6dc 62%,rgba(255,246,220,0))}
+.scene-tropic .sdet{color:#2f4a3a;bottom:auto;top:58%;padding:0 18%}

@@ -1,11 +1,13 @@
 export type Motif = "lotus" | "arch" | "sun" | "moon";
-export type Scene = "portico" | "garden";
+export type Scene = "portico" | "garden" | "haldi" | "tropic";
 export type Design = { n: string; c: string; p: number; a: string; b: string; m: Motif; s?: Scene };
 export type Lang = "en" | "hi" | "mr";
 
 export const designs: Design[] = [
   { n: "Royal Portico", c: "wedding", p: 499, a: "#fbf1e3", b: "#5a1022", m: "arch", s: "portico" },
   { n: "Garden Dance", c: "wedding", p: 499, a: "#fbf1e3", b: "#5a1022", m: "lotus", s: "garden" },
+  { n: "Haldi Swing", c: "haldi", p: 499, a: "#fff6dc", b: "#6b3d00", m: "sun", s: "haldi" },
+  { n: "Frangipani", c: "wedding", p: 399, a: "#f7f1e6", b: "#2f4a3a", m: "lotus", s: "tropic" },
   { n: "Lotus Court", c: "engagement", p: 99, a: "#6b1428", b: "#e9d3a0", m: "lotus" },
   { n: "Peacock Night", c: "wedding", p: 399, a: "#0f4c4a", b: "#d9ac55", m: "arch" },
   { n: "Marigold Morning", c: "wedding", p: 399, a: "#c9791b", b: "#fff0c9", m: "sun" },
@@ -23,6 +25,7 @@ export const designs: Design[] = [
 export const cats: { id: string; en: string; hi: string; mr: string }[] = [
   { id: "wedding", en: "Wedding", hi: "विवाह", mr: "विवाह" },
   { id: "engagement", en: "Engagement", hi: "सगाई", mr: "साखरपुडा" },
+  { id: "haldi", en: "Haldi", hi: "हल्दी", mr: "हळद" },
   { id: "birthday", en: "Birthday", hi: "जन्मदिन", mr: "वाढदिवस" },
   { id: "baby", en: "Baby shower", hi: "गोद भराई", mr: "डोहाळे जेवण" },
   { id: "home", en: "Housewarming", hi: "गृह प्रवेश", mr: "गृहप्रवेश" },
