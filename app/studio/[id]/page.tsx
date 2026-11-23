@@ -1,10 +1,10 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import StudioShell from "@/components/StudioShell";
-import LivePreview from "@/components/LivePreview";
+import InviteEditor from "@/components/InviteEditor";
 import { serverClient } from "@/lib/supabase/server";
-import { artSvg, cats, designBy, designs } from "@/lib/designs";
-import { deleteInvite, saveInvite } from "../actions";
+import { designs } from "@/lib/designs";
+import { deleteInvite } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +28,7 @@ export default async function EditInvite({
   searchParams,
 }: {
   params: { id: string };
-  searchParams: { saved?: string; error?: string };
+  searchParams: { saved?: string; error?: string; d?: string };
 }) {
   const isNew = params.id === "new";
   let invite: Invite | null = null;
@@ -44,47 +44,24 @@ export default async function EditInvite({
   const d: Invite = invite ?? {
     id: "", slug: "", n1: "Meera", n2: "Kabir", occ: "wedding", lang: "en", date_text: "14 February 2027",
     time_text: "7:30 PM", venue: "City Palace, Udaipur",
-    msg: "With the blessings of our families, we invite you to celebrate with us.", design: designs[0].n,
+    msg: "With the blessings of our families, we invite you to celebrate with us.",
+    design: designs.some((x) => x.n === searchParams.d) ? searchParams.d! : designs[0].n,
   };
 
   return (
     <StudioShell selectedId={isNew ? "new" : params.id}>
-      <div className="editgrid">
-      <form className="panel" id="invform" action={saveInvite}>
-        <h3>{isNew ? "New invitation" : "Edit invitation"}</h3>
-        <input type="hidden" name="id" value={isNew ? "" : d.id} />
-        <div className="fgrid">
-          <div className="field"><label htmlFor="n1">Name</label><input id="n1" name="n1" type="text" required maxLength={80} defaultValue={d.n1} /></div>
-          <div className="field"><label htmlFor="n2">Second name (optional)</label><input id="n2" name="n2" type="text" maxLength={80} defaultValue={d.n2} /></div>
-          <div className="field"><label htmlFor="occ">Occasion</label>
-            <select id="occ" name="occ" defaultValue={d.occ}>{cats.map((c) => <option key={c.id} value={c.id}>{c.en}</option>)}</select></div>
-          <div className="field"><label htmlFor="lang">Invitation language</label>
-            <select id="lang" name="lang" defaultValue={d.lang}><option value="en">English</option><option value="hi">हिन्दी</option><option value="mr">मराठी</option></select></div>
-          <div className="field"><label htmlFor="date_text">Date</label><input id="date_text" name="date_text" type="text" maxLength={60} defaultValue={d.date_text} /></div>
-          <div className="field"><label htmlFor="time_text">Time</label><input id="time_text" name="time_text" type="text" maxLength={40} defaultValue={d.time_text} /></div>
-        </div>
-        <div className="field"><label htmlFor="venue">Venue</label><input id="venue" name="venue" type="text" maxLength={160} defaultValue={d.venue} /></div>
-        <div className="field"><label htmlFor="msg">Message to guests</label><textarea id="msg" name="msg" maxLength={500} defaultValue={d.msg} /></div>
-        <div className="field">
-          <label htmlFor="design">Design</label>
-          <div className="prevrow">
-            <div className="art" dangerouslySetInnerHTML={{ __html: artSvg(designBy(d.design)) }} />
-            <select id="design" name="design" defaultValue={d.design}>{designs.map((x) => <option key={x.n}>{x.n}</option>)}</select>
-          </div>
-        </div>
-        <div className="row">
-          <button className="btn" type="submit">Save invitation</button>
-          {searchParams.saved && <span className="note okmsg" role="status">Saved.</span>}
-          {searchParams.error && <span className="note err" role="status">{searchParams.error === "name" ? "Enter at least one name." : "Could not save. Please try again."}</span>}
-        </div>
-      </form>
-      <LivePreview
-        formId="invform"
-        initialLang={d.lang === "hi" || d.lang === "mr" ? d.lang : "en"}
-        initial={{ n1: d.n1, n2: d.n2, occ: d.occ, date_text: d.date_text, time_text: d.time_text, venue: d.venue, msg: d.msg, design: d.design }}
+      <InviteEditor
+        v={{ ...d, id: isNew ? "" : d.id }}
+        title={isNew ? "New invitation" : "Edit invitation"}
+        saveLabel={isNew ? "Save and get guest link" : "Save invitation"}
+        restoreDraft={isNew}
+        status={
+          <>
+            {searchParams.saved && <span className="note okmsg" role="status">Saved.</span>}
+            {searchParams.error && <span className="note err" role="status">{searchParams.error === "name" ? "Enter at least one name." : "Could not save. Please try again."}</span>}
+          </>
+        }
       />
-      <a className="pvjump" href="#preview">Preview</a>
-      </div>
 
       {invite && <Share invite={invite} />}
       {invite && <Dashboard invite={invite} />}

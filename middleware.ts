@@ -27,7 +27,17 @@ export async function middleware(request: NextRequest) {
       },
     },
   });
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+  const next = request.cookies.get("nm_next")?.value;
+  if (user && next === "/studio/new" && p === "/studio") {
+    const to = request.nextUrl.clone();
+    to.pathname = "/studio/new";
+    to.search = "";
+    const r = NextResponse.redirect(to);
+    response.cookies.getAll().forEach((c) => r.cookies.set(c));
+    r.cookies.delete("nm_next");
+    return r;
+  }
   return response;
 }
 

@@ -24,7 +24,7 @@ export default function Home() {
             you see who has opened it. No app or sign-up for guests.
           </p>
           <div className="row">
-            <Link className="btn" href="/studio/new">Create an invitation</Link>
+            <Link className="btn" href="/create">Create an invitation</Link>
             <a className="btn ghost" href="#designs">Browse designs</a>
           </div>
         </div>
@@ -41,11 +41,12 @@ export default function Home() {
         <h2 style={{ marginBottom: "1.6rem" }}>What are we celebrating?</h2>
         <div className="grid">
           {designs.map((d) => (
-            <article key={d.n} style={{ display: "grid", gap: ".6rem" }}>
+            <Link key={d.n} className="tcard" href={`/create?d=${encodeURIComponent(d.n)}`}>
               <div className="art" dangerouslySetInnerHTML={{ __html: artSvg(d) }} />
               <h3>{d.n}</h3>
               <div className="meta"><span>{catLabel(d.c)}</span><span className="price">₹{d.p}</span></div>
-            </article>
+              <span className="btn small tuse">Use this template</span>
+            </Link>
           ))}
         </div>
       </section>

@@ -1,5 +1,6 @@
 "use server";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { serverClient } from "@/lib/supabase/server";
 import { newSlug } from "@/lib/slug";
 import { cats, designs } from "@/lib/designs";
@@ -11,7 +12,11 @@ function str(fd: FormData, key: string, max: number): string {
 export async function saveInvite(fd: FormData): Promise<void> {
   const sb = serverClient();
   const { data: { user } } = await sb.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) {
+    // The editor keeps the draft in the browser; after logging in the host returns to it.
+    cookies().set("nm_next", "/studio/new", { path: "/", maxAge: 60 * 60 * 24, sameSite: "lax", httpOnly: true, secure: true });
+    redirect("/login?next=save");
+  }
 
   const id = str(fd, "id", 40);
   const n1 = str(fd, "n1", 80);

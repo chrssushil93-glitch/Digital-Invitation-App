@@ -199,4 +199,18 @@ footer.sitefoot{border-top:1px solid var(--line);margin-top:2rem;padding-block:1
 @keyframes bloom{from{opacity:0;scale:.6}}
 @media (prefers-reduced-motion: reduce){.scene-tropic [class*="fl"],.scene-haldi .decor{animation:none}}
 .scene-haldi .sdet{color:#6b3d00;background:linear-gradient(to top,#fff6dc 62%,rgba(255,246,220,0))}
-.scene-tropic .sdet{color:#2f4a3a;bottom:auto;top:58%;padding:0 18%}
+.scene-tropic .sdet{color:#2f4a3a;bottom:auto;top:55%;padding:0 20% 0 16%}
+
+/* template cards and picker */
+.tcard{display:grid;gap:.6rem;color:inherit;text-decoration:none;border-radius:16px;transition:transform .2s}
+.tcard:hover{transform:translateY(-3px)}
+.tcard .tuse{justify-self:start}
+.tpick{border:0;padding:0;margin:0 0 1.2rem}
+.tpick legend{font-weight:600;font-size:.9rem;margin-bottom:.5rem;padding:0}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:.7rem}
+.topt{display:grid;gap:.3rem;cursor:pointer;position:relative}
+.topt input{position:absolute;opacity:0;pointer-events:none}
+.topt .art{border:2px solid transparent;transition:border-color .15s,box-shadow .15s}
+.topt input:checked+.art{border-color:var(--maroon);box-shadow:0 0 0 3px rgba(107,20,40,.18)}
+.topt input:focus-visible+.art{outline:2px solid var(--gold);outline-offset:2px}
+.topt .tname{font-size:.75rem;text-align:center;line-height:1.2}
