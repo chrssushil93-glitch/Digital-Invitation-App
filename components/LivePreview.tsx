@@ -56,14 +56,14 @@ export default function LivePreview({ formId, initial, initialLang }: { formId: 
           {mode === "card" ? (
             <InviteCard inv={inv} lang={lang} />
           ) : (
-            <DoorReveal key={`${run}-${d.n}`} hint={G[lang].tap} autoOpenMs={1500} opener={d.o ?? "wood"}>
+            <DoorReveal key={`${run}-${d.n}`} hint={G[lang].tap} autoOpenMs={1500}>
               <InviteCard inv={inv} lang={lang} />
             </DoorReveal>
           )}
         </div>
       </div>
       <p className="note pvnote">
-        {d.n} · opens with {d.o === "gate" ? "the royal gate" : "the wooden door"}. Changes show here as you type; save to update the guest link.
+        {d.n}. Changes show here as you type; save to update the guest link.
       </p>
     </aside>
   );

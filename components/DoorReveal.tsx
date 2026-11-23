@@ -5,8 +5,6 @@ type Phase = "loading" | "closed" | "opening" | "revealed" | "done" | "skip";
 
 const DOOR_YAW = Math.PI / 2;
 const MODEL_URL = "/models/old-wooden-door/scene.gltf";
-const GATE_URL = "/models/gate/reja.glb";
-export type Opener = "wood" | "gate";
 
 /**
  * Shows a 3D wooden door. A tap (or a short wait) plays the model's opening
@@ -19,13 +17,11 @@ export default function DoorReveal({
   hint,
   replayLabel,
   autoOpenMs = 3500,
-  opener = "wood",
 }: {
   children: React.ReactNode;
   hint: string;
   replayLabel?: string;
   autoOpenMs?: number;
-  opener?: Opener;
 }) {
   const [phase, setPhase] = useState<Phase>("loading");
   const [runKey, setRunKey] = useState(0);
@@ -39,7 +35,6 @@ export default function DoorReveal({
       return;
     }
     setPhase("loading");
-    const isGate = opener === "gate";
     let disposed = false;
     let teardown = () => {};
     const timers: number[] = [];
@@ -85,8 +80,7 @@ export default function DoorReveal({
           renderer.setSize(w, h, false);
           camera.aspect = w / h;
           const t = Math.tan((camera.fov * Math.PI) / 360);
-          const mg = opener === "gate" ? 0.53 : 0.56;
-          baseZ = Math.max((modelH * mg) / t, (modelW * mg) / (t * camera.aspect));
+          baseZ = Math.max((modelH * 0.56) / t, (modelW * 0.56) / (t * camera.aspect));
           if (!dollyStart) camera.position.set(0, 0, baseZ);
           camera.updateProjectionMatrix();
         };
@@ -138,7 +132,7 @@ export default function DoorReveal({
 
         const loader = new GLTFLoader();
         const gltf = await Promise.race([
-          loader.loadAsync(isGate ? GATE_URL : MODEL_URL),
+          loader.loadAsync(MODEL_URL),
           new Promise<never>((_, reject) => later(() => reject(new Error("door model timed out")), 15000)),
         ]);
         if (disposed) {
@@ -149,7 +143,7 @@ export default function DoorReveal({
         const model = gltf.scene;
         // Pose the skinned leaves first, so the bounds describe what is actually drawn.
         const mixer = new THREE.AnimationMixer(model);
-        const clip = isGate ? undefined : gltf.animations[0];
+        const clip = gltf.animations[0];
         const action = clip ? mixer.clipAction(clip) : null;
         if (action) {
           action.setLoop(THREE.LoopOnce, 1);
@@ -169,38 +163,11 @@ export default function DoorReveal({
         pivot.add(model);
         const s = 2 / size.y;
         pivot.scale.setScalar(s);
-        pivot.rotation.y = isGate ? 0 : DOOR_YAW; // the door is authored facing sideways
+        pivot.rotation.y = DOOR_YAW; // the model is authored facing sideways
         scene.add(pivot);
-        modelW = (isGate ? size.x : size.z) * s;
+        modelW = size.z * s;
         modelH = 2;
-        if (isGate) { glow.scale.setScalar(0.8); (glow.material as import("three").MeshBasicMaterial).opacity = 0.7; }
-        glow.position.z = isGate ? -1 : -(size.x * s) / 2 - 0.05;
-
-        // Gate: the two side leaves swing on hinges, then the whole gate fades as the camera moves in.
-        const leaves: { hinge: import("three").Group; dir: number }[] = [];
-        const gateMats: import("three").Material[] = [];
-        if (isGate) {
-          model.updateMatrixWorld(true);
-          ["puerta", "puerta.001"].forEach((name) => {
-            const leaf = model.getObjectByName(name);
-            if (!leaf) return;
-            const hinge = new THREE.Group();
-            const wp = leaf.getWorldPosition(new THREE.Vector3());
-            model.worldToLocal(wp);
-            hinge.position.copy(wp);
-            model.add(hinge);
-            hinge.attach(leaf);
-            leaves.push({ hinge, dir: wp.x > 0 ? -1 : 1 });
-          });
-          model.traverse((o) => {
-            const m = o as import("three").Mesh;
-            if (!m.isMesh) return;
-            (Array.isArray(m.material) ? m.material : [m.material]).forEach((mat) => {
-              gateMats.push(mat);
-            });
-          });
-        }
-        let gateT0 = 0;
+        glow.position.z = -(size.x * s) / 2 - 0.05;
         fit();
 
         let opened = false;
@@ -214,13 +181,8 @@ export default function DoorReveal({
           opened = true;
           setPhase("opening");
           if (action) action.paused = false;
-          if (isGate) {
-            gateT0 = performance.now();
-            later(startDolly, 2000);
-          } else {
-            later(startDolly, 6000); // safety net if the animation never reports it has finished
-            if (!action) startDolly();
-          }
+          later(startDolly, 6000); // safety net if the animation never reports it has finished
+          if (!action) startDolly();
         };
         openRef.current = open;
 
@@ -229,14 +191,9 @@ export default function DoorReveal({
         let revealed = false;
         renderer.setAnimationLoop(() => {
           mixer.update(Math.min(clock.getDelta(), 0.05));
-          if (isGate && gateT0) {
-            const a = ease(Math.min(1, (performance.now() - gateT0) / 1900));
-            leaves.forEach((l) => (l.hinge.rotation.y = l.dir * a * 1.75));
-          }
           if (dollyStart) {
             const t = Math.min(1, (performance.now() - dollyStart) / 1400);
             camera.position.z = baseZ * (1 - 0.5 * ease(t));
-            if (isGate) gateMats.forEach((m) => (m.transparent = true, m.opacity = 1 - ease(Math.min(1, t * 1.4))));
             if (t > 0.35 && !revealed) {
               revealed = true;
               setPhase("revealed");
@@ -262,7 +219,7 @@ export default function DoorReveal({
       timers.forEach((t) => window.clearTimeout(t));
       teardown();
     };
-  }, [runKey, autoOpenMs, opener]);
+  }, [runKey, autoOpenMs]);
 
   return (
     <>

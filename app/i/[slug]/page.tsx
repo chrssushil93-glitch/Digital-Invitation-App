@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { serverClient } from "@/lib/supabase/server";
 import { G, asLang } from "@/lib/i18n";
-import { designBy } from "@/lib/designs";
 import GuestForm from "@/components/GuestForm";
 import DoorReveal from "@/components/DoorReveal";
 import InviteCard from "@/components/InviteCard";
@@ -41,7 +40,7 @@ export default async function GuestPage({ params }: { params: { slug: string } }
     <div className="wrap">
       <div className="gwrap">
         <MusicPlayer src="/audio/wedding-music.mp3" on="Play music" off="Mute music" />
-        <DoorReveal hint={g.tap} opener={designBy(inv.design).o ?? "wood"}>
+        <DoorReveal hint={g.tap}>
           <InviteCard inv={inv} lang={lang} />
         </DoorReveal>
         <GuestForm slug={inv.slug} strings={g} />

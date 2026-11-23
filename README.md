@@ -47,7 +47,6 @@ Payments and pricing checkout, more designs and languages, the Monday email repo
 
 ## 3D model credits (CC BY 4.0)
 - Old wooden Door by Ellie3D (Sketchfab)
-- Reja by e-restrepo1114 (Sketchfab)
 - 700511 Classic Osgona chandelier by LIGHTSTAR GROUP (Sketchfab)
 
 Original uploads live in `source-assets/`; only optimised copies ship from `public/`.
