@@ -19,7 +19,7 @@ export default function InviteEditor({
 }) {
   const lang = v.lang === "hi" || v.lang === "mr" ? v.lang : "en";
   return (
-    <div className="editgrid">
+    <div className="editcol">
       <form className="panel" id="invform" action={saveInvite}>
         <h3>{title}</h3>
         <input type="hidden" name="id" value={v.id} />
@@ -35,6 +35,12 @@ export default function InviteEditor({
             ))}
           </div>
         </fieldset>
+        <LivePreview
+          formId="invform"
+          initialLang={lang}
+          initial={{ n1: v.n1, n2: v.n2, occ: v.occ, date_text: v.date_text, time_text: v.time_text, venue: v.venue, msg: v.msg, design: v.design }}
+        />
+        <h3 className="edhead">Your details</h3>
         <div className="fgrid">
           <div className="field"><label htmlFor="n1">Name</label><input id="n1" name="n1" type="text" required maxLength={80} defaultValue={v.n1} /></div>
           <div className="field"><label htmlFor="n2">Second name (optional)</label><input id="n2" name="n2" type="text" maxLength={80} defaultValue={v.n2} /></div>
@@ -52,12 +58,6 @@ export default function InviteEditor({
           {status}
         </div>
       </form>
-      <LivePreview
-        formId="invform"
-        initialLang={lang}
-        initial={{ n1: v.n1, n2: v.n2, occ: v.occ, date_text: v.date_text, time_text: v.time_text, venue: v.venue, msg: v.msg, design: v.design }}
-      />
-      <a className="pvjump" href="#preview">Preview</a>
       <DraftKeeper formId="invform" restore={restoreDraft} track={!v.id} />
     </div>
   );

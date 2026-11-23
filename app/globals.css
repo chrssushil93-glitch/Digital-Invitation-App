@@ -214,3 +214,10 @@ footer.sitefoot{border-top:1px solid var(--line);margin-top:2rem;padding-block:1
 .topt input:checked+.art{border-color:var(--maroon);box-shadow:0 0 0 3px rgba(107,20,40,.18)}
 .topt input:focus-visible+.art{outline:2px solid var(--gold);outline-offset:2px}
 .topt .tname{font-size:.75rem;text-align:center;line-height:1.2}
+
+/* editor: template, then its preview, then the text boxes */
+.editcol{display:grid;gap:1.5rem;max-width:760px}
+.editcol .livepv{position:static;border:0;padding:0;background:none;max-width:340px;margin:0 auto 1.6rem}
+.edhead{margin:.4rem 0 1rem;padding-top:1.2rem;border-top:1px solid var(--line)}
+.editcol .tgrid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:96px;overflow-x:auto;padding:4px 2px 10px;scroll-snap-type:x proximity}
+.editcol .topt{scroll-snap-align:start}

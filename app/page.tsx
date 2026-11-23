@@ -18,7 +18,7 @@ export default function Home() {
       <div className="hero">
         <div>
           <p className="eyebrow">Animated invitations · हिन्दी · English · मराठी</p>
-          <h1>An invitation that opens like a royal gate.</h1>
+          <h1>An invitation that opens like a door.</h1>
           <p className="lead">
             Pick a design, add your names and ceremonies, and share one link on WhatsApp. Guests reply with a tap and
             you see who has opened it. No app or sign-up for guests.
@@ -29,7 +29,7 @@ export default function Home() {
           </div>
         </div>
         <div style={{ maxWidth: "min(400px, calc((100svh - 6rem) * 9 / 16))", justifySelf: "center", width: "100%" }}>
-          <DoorReveal hint="Tap to open" replayLabel="Replay the gate" autoOpenMs={2600}>
+          <DoorReveal hint="Tap to open" replayLabel="Replay the doors" autoOpenMs={2600}>
             <InviteCard lang="en" inv={{ n1: "Meera", n2: "Kabir", occ: "wedding", date_text: "14 February 2027", time_text: "7:30 PM",
               venue: "City Palace, Udaipur", msg: "With the blessings of our families, we invite you to celebrate with us.", design: designs[0].n }} />
           </DoorReveal>
