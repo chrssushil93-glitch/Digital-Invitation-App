@@ -40,14 +40,20 @@ export async function saveInvite(fd: FormData): Promise<void> {
   if (id && id !== "new") {
     // Row level security limits this to the host's own invitation.
     const { error } = await sb.from("invites").update(fields).eq("id", id);
-    if (error) redirect(`/studio/${id}?error=save`);
+    if (error) {
+      console.error("saveInvite update failed", error.code, error.message, error.details, error.hint);
+      redirect(`/studio/${id}?error=save`);
+    }
     redirect(`/studio/${id}?saved=1`);
   }
 
   for (let i = 0; i < 4; i++) {
     const { data, error } = await sb.from("invites").insert({ ...fields, owner: user.id, slug: newSlug() }).select("id").single();
     if (data) redirect(`/studio/${data.id}?saved=1`);
-    if (error && error.code !== "23505") break; // retry only on a slug clash
+    if (error && error.code !== "23505") {
+      console.error("saveInvite insert failed", error.code, error.message, error.details, error.hint);
+      break; // retry only on a slug clash
+    }
   }
   redirect("/studio/new?error=save");
 }
