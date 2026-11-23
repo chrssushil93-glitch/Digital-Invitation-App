@@ -7,7 +7,7 @@ export default function DoorCredit() {
   return (
     <p className="credit">
       3D models: “<L href="https://sketchfab.com/3d-models/old-wooden-door-1cec090cd02142b094802d242e03ee7c">Old wooden Door</L>” by{" "}
-      <L href="https://sketchfab.com/Ellie3D">Ellie3D</L>; “700511 Classic Osgona chandelier” by LIGHTSTAR GROUP — all on Sketchfab, licensed {by}.
+      <L href="https://sketchfab.com/Ellie3D">Ellie3D</L>; “Reja” by e-restrepo1114; “700511 Classic Osgona chandelier” by LIGHTSTAR GROUP — all on Sketchfab, licensed {by}.
     </p>
   );
 }
