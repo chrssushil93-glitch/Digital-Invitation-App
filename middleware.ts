@@ -3,6 +3,13 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // Keeps the host's Supabase session fresh on studio and auth routes.
 export async function middleware(request: NextRequest) {
+  const q = request.nextUrl.searchParams;
+  const p = request.nextUrl.pathname;
+  if (!p.startsWith("/auth/") && (q.has("code") || (q.has("token_hash") && q.has("type")))) {
+    const to = request.nextUrl.clone();
+    to.pathname = "/auth/callback";
+    return NextResponse.redirect(to);
+  }
   let response = NextResponse.next({ request });
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -24,4 +31,4 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
-export const config = { matcher: ["/studio/:path*", "/login", "/auth/:path*"] };
+export const config = { matcher: ["/", "/studio/:path*", "/login", "/auth/:path*"] };

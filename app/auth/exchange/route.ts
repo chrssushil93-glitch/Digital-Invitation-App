@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { serverClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
+/** Exchanges a one-time ?code= from Supabase for session cookies. */
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
