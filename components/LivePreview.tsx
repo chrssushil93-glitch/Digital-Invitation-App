@@ -4,14 +4,18 @@ import DoorReveal from "@/components/DoorReveal";
 import InviteCard, { type InviteData } from "@/components/InviteCard";
 import { designBy, type Lang } from "@/lib/designs";
 import { G } from "@/lib/i18n";
+import { WATERMARK_LOGO } from "@/lib/brand";
 
 const FIELDS = ["n1", "n2", "occ", "date_text", "time_text", "venue", "msg", "design"] as const;
 
 /**
  * Live preview for the host while they edit: follows every keystroke in the form,
- * and can play the opening animation exactly as guests will see it.
+ * and can play the opening animation exactly as guests will see it. Until the invitation
+ * is paid for, the logo is tiled over it so a screenshot is not a usable invitation.
  */
-export default function LivePreview({ formId, initial, initialLang }: { formId: string; initial: InviteData; initialLang: Lang }) {
+export default function LivePreview({
+  formId, initial, initialLang, watermark = true,
+}: { formId: string; initial: InviteData; initialLang: Lang; watermark?: boolean }) {
   const [inv, setInv] = useState<InviteData>(initial);
   const [lang, setLang] = useState<Lang>(initialLang);
   const [mode, setMode] = useState<"card" | "opening">("card");
@@ -43,9 +47,9 @@ export default function LivePreview({ formId, initial, initialLang }: { formId: 
   };
 
   return (
-    <aside className="panel livepv" id="preview" aria-label="Invitation preview">
+    <aside className="livepv" id="preview" aria-label="Invitation preview">
       <div className="pvhead">
-        <h3>Preview</h3>
+        <h2 className="h3">Preview</h2>
         <div className="seg" role="group" aria-label="Preview mode">
           <button type="button" aria-pressed={mode === "card"} onClick={() => setMode("card")}>Card</button>
           <button type="button" aria-pressed={mode === "opening"} onClick={play}>{mode === "opening" ? "Replay" : "Play opening"}</button>
@@ -60,10 +64,17 @@ export default function LivePreview({ formId, initial, initialLang }: { formId: 
               <InviteCard inv={inv} lang={lang} />
             </DoorReveal>
           )}
+          {watermark && (
+            <div className="wm" aria-hidden="true">
+              <div className="wmtile" style={{ backgroundImage: `url(${WATERMARK_LOGO})` }} />
+              <span className="wmbadge">Preview</span>
+            </div>
+          )}
         </div>
       </div>
       <p className="note pvnote">
-        {d.n}. Changes show here as you type; save to update the guest link.
+        {d.n} · ₹{d.p}. Changes show here as you type.
+        {watermark ? " Guests see it without the watermark once you publish." : " Save to update the guest link."}
       </p>
     </aside>
   );

@@ -41,4 +41,4 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
-export const config = { matcher: ["/", "/studio/:path*", "/login", "/auth/:path*"] };
+export const config = { matcher: ["/", "/create", "/studio/:path*", "/login", "/auth/:path*"] };

@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 
 const KEY = "nm-draft";
+const FIELDS = ["design", "n1", "n2", "occ", "lang", "date_text", "time_text", "venue", "msg"];
 
 /** Keeps an unsaved new invitation in this browser, so logging in to save it loses nothing. */
 export default function DraftKeeper({ formId, restore, track }: { formId: string; restore: boolean; track: boolean }) {
@@ -16,7 +17,7 @@ export default function DraftKeeper({ formId, restore, track }: { formId: string
       try {
         const saved = JSON.parse(localStorage.getItem(KEY) ?? "null") as Record<string, string> | null;
         if (saved) {
-          Object.entries(saved).forEach(([k, val]) => {
+          Object.entries(saved).filter(([k]) => FIELDS.includes(k)).forEach(([k, val]) => {
             const els = form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(`[name="${k}"]`);
             els.forEach((el) => {
               if (el instanceof HTMLInputElement && el.type === "radio") el.checked = el.value === val;
@@ -29,7 +30,7 @@ export default function DraftKeeper({ formId, restore, track }: { formId: string
     }
     const save = () => {
       const out: Record<string, string> = {};
-      new FormData(form).forEach((val, k) => { if (k !== "id") out[k] = String(val); });
+      new FormData(form).forEach((val, k) => { if (FIELDS.includes(k)) out[k] = String(val); });
       try { localStorage.setItem(KEY, JSON.stringify(out)); } catch { /* storage unavailable */ }
     };
     form.addEventListener("input", save);

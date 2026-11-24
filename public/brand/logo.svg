@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 72" width="240" height="72">
+  <!-- Placeholder Nimantran logo. Replace this file with your own logo (keep the name logo.svg),
+       or put a PNG next to it and point WATERMARK_LOGO in lib/brand.ts at it. -->
+  <g fill="none" stroke="#6b1428" stroke-width="2.4" stroke-linejoin="round">
+    <path d="M36 12c7 8 10 15 10 22a10 10 0 0 1-20 0c0-7 3-14 10-22z"/>
+    <path d="M14 40c6 0 12 3 15 9M58 40c-6 0-12 3-15 9"/>
+    <path d="M12 54h48"/>
+  </g>
+  <circle cx="36" cy="33" r="3.2" fill="#b8862b"/>
+  <text x="74" y="46" font-family="Georgia, 'Times New Roman', serif" font-size="30" fill="#6b1428" letter-spacing=".5">Nimantran</text>
+</svg>

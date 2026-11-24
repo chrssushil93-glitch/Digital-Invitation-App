@@ -59,16 +59,22 @@ export default function GuestForm({ slug, strings: g }: { slug: string; strings:
           ))}
         </div>
       </div>
-      <div className="field">
-        <label htmlFor="g_count">{g.guests}</label>
-        <input id="g_count" type="number" min={1} max={20} value={count}
-          onChange={(e) => setCount(Math.max(1, Math.min(20, parseInt(e.target.value, 10) || 1)))} />
-      </div>
+      {resp !== "no" && (
+        <div className="field">
+          <label htmlFor="g_count">{g.guests}</label>
+          <div className="stepper">
+            <button type="button" aria-label="−1" onClick={() => setCount((c) => Math.max(1, c - 1))} disabled={count <= 1}>−</button>
+            <input id="g_count" type="number" inputMode="numeric" min={1} max={20} value={count}
+              onChange={(e) => setCount(Math.max(1, Math.min(20, parseInt(e.target.value, 10) || 1)))} />
+            <button type="button" aria-label="+1" onClick={() => setCount((c) => Math.min(20, c + 1))} disabled={count >= 20}>+</button>
+          </div>
+        </div>
+      )}
       <div className="field">
         <label htmlFor="g_note">{g.note}</label>
         <textarea id="g_note" maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} />
       </div>
-      <button className="btn" type="submit" disabled={busy}>{sent ? g.update : g.send}</button>
+      <button className="btn block" type="submit" disabled={busy}>{busy ? "…" : sent ? g.update : g.send}</button>
       <p role="status" className={msg?.bad ? "note err" : "note okmsg"} style={{ marginTop: ".8rem", minHeight: "1.5rem" }}>{msg?.text ?? ""}</p>
     </form>
   );

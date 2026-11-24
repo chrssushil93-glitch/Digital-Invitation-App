@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { EMAIL_RE, authMessage } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,7 @@ export async function POST(request: Request) {
   } catch {
     /* fall through to validation */
   }
-  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (email.length > 254 || !EMAIL_RE.test(email)) {
     return NextResponse.json({ ok: false, error: "Please enter a valid email address." }, { status: 400 });
   }
   // Implicit flow: the emailed link carries the session itself, so it works even when the
@@ -28,11 +29,10 @@ export async function POST(request: Request) {
     options: { shouldCreateUser: true, emailRedirectTo: `${origin}/auth/callback${draft ? `?draft=${draft}` : ""}` },
   });
   if (error) {
-    const limited = error.status === 429 || /rate limit/i.test(error.message);
-    return NextResponse.json(
-      { ok: false, error: limited ? "Too many sign-in emails were sent. Please wait a few minutes and try again." : "The sign-in email could not be sent. Please try again." },
-      { status: limited ? 429 : 502 }
-    );
+    // Shows up in Vercel logs. "email_address_not_authorized" means Supabase's built-in email
+    // only sends to your own team: add custom SMTP in Supabase (Authentication -> Emails).
+    console.error("auth/send:", error.code, error.status, error.message);
+    return NextResponse.json({ ok: false, error: authMessage(error) }, { status: error.status === 429 ? 429 : 502 });
   }
   return NextResponse.json({ ok: true });
 }

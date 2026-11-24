@@ -13,7 +13,9 @@ export const dynamic = "force-dynamic";
 async function load(slug: string) {
   if (!/^[a-z0-9]{4,32}$/.test(slug)) return null;
   // Public fields only, through a database function. No secret key involved.
-  const { data } = await serverClient().rpc("get_public_invite", { p_slug: slug });
+  const { data, error } = await serverClient().rpc("get_public_invite", { p_slug: slug });
+  // PGRST202 here means supabase/setup.sql has not been run: every guest link would 404.
+  if (error) console.error("guest page: get_public_invite failed", error.code, error.message);
   return data as null | {
     slug: string; n1: string; n2: string; occ: string; lang: string;
     date_text: string; time_text: string; venue: string; msg: string; design: string;
