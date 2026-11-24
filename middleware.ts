@@ -5,7 +5,9 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   const q = request.nextUrl.searchParams;
   const p = request.nextUrl.pathname;
-  if (!p.startsWith("/auth/") && (q.has("code") || (q.has("token_hash") && q.has("type")))) {
+  // Supabase sign-in codes are UUIDs; anything else named "code" is not ours to exchange.
+  const authCode = /^[0-9a-f-]{36}$/i.test(q.get("code") ?? "");
+  if (!p.startsWith("/auth/") && (authCode || (q.has("token_hash") && q.has("type")))) {
     const to = request.nextUrl.clone();
     to.pathname = "/auth/callback";
     return NextResponse.redirect(to);

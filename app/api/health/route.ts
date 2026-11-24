@@ -13,7 +13,8 @@ export async function GET() {
 
   const fmt = (e: { code?: string; message?: string } | null) => (e ? `${e.code}: ${e.message} -> run supabase/setup.sql` : "ok");
   const sb = createClient(url, key, { auth: { persistSession: false } });
-  const table = async (t: string) => fmt((await sb.from(t).select("id", { head: true, count: "exact" }).limit(1)).error);
+  // Plain GETs: supabase-js turns the empty 404 of a HEAD request for a missing table into "no error".
+  const table = async (t: string) => fmt((await sb.from(t).select("id").limit(1)).error);
 
   const out: Record<string, string> = {
     invites: await table("invites"),
@@ -24,8 +25,8 @@ export async function GET() {
 
   if (adminConfigured()) {
     const admin = adminClient();
-    out.payment_columns = fmt((await admin.from("invites").select("status,paid_amount", { head: true }).limit(1)).error);
-    out.payments_table = fmt((await admin.from("payments").select("id", { head: true }).limit(1)).error);
+    out.payment_columns = fmt((await admin.from("invites").select("status,paid_amount").limit(1)).error);
+    out.payments_table = fmt((await admin.from("payments").select("id").limit(1)).error);
     out.confirm_payment = fmt((await admin.rpc("confirm_payment", { p_order_id: "health-check", p_payment_id: "health-check" })).error);
     out.service_role_key = "ok";
   } else {

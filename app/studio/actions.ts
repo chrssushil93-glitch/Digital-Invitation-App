@@ -3,14 +3,20 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { serverClient } from "@/lib/supabase/server";
 import { newSlug } from "@/lib/slug";
+import { isSetupError } from "@/lib/studio";
 import { cats, designBy, designs } from "@/lib/designs";
 
 function str(fd: FormData, key: string, max: number): string {
   return String(fd.get(key) ?? "").trim().slice(0, max);
 }
 
-function logDb(where: string, error: { code?: string; message?: string; details?: string | null; hint?: string | null }) {
+type DbError = { code?: string; message?: string; details?: string | null; hint?: string | null };
+
+/** Logs a database error and returns the query string for the editor's error message. */
+function dbFail(where: string, error: DbError): string {
   console.error(where, error.code, error.message, error.details, error.hint);
+  // "dbcode", not "code": ?code= is how Supabase hands back a sign-in, and the middleware treats it so.
+  return `error=${isSetupError(error) ? "setup" : "save"}&dbcode=${encodeURIComponent(error.code ?? "")}`;
 }
 
 /**
@@ -49,30 +55,21 @@ async function save(fd: FormData, intent: "draft" | "pay"): Promise<void> {
   if (id && id !== "new") {
     // Row level security limits this to the host's own invitation.
     const { data: cur, error: readErr } = await sb.from("invites").select("status,paid_amount").eq("id", id).maybeSingle();
-    if (readErr) {
-      logDb("saveInvite read failed", readErr);
-      redirect(`${back}?error=save&code=${encodeURIComponent(readErr.code ?? "")}`);
-    }
+    if (readErr) redirect(`${back}?${dbFail("saveInvite read failed", readErr)}`);
     if (!cur) redirect("/studio");
     const published = cur.status === "published";
     // After paying, the host can switch to any template that costs the same or less.
     if (published && cur.paid_amount != null && designBy(fields.design).p > cur.paid_amount) redirect(`${back}?error=design`);
 
     const { error } = await sb.from("invites").update(fields).eq("id", id);
-    if (error) {
-      logDb("saveInvite update failed", error);
-      redirect(`${back}?error=save&code=${encodeURIComponent(error.code ?? "")}`);
-    }
+    if (error) redirect(`${back}?${dbFail("saveInvite update failed", error)}`);
     redirect(intent === "pay" && !published ? `${back}?pay=1` : `${back}?saved=1`);
   }
 
   for (let i = 0; i < 4; i++) {
     const { data, error } = await sb.from("invites").insert({ ...fields, owner: user.id, slug: newSlug() }).select("id").single();
     if (data) redirect(`/studio/${data.id}?${intent === "pay" ? "pay=1" : "saved=1"}`);
-    if (error && error.code !== "23505") {
-      logDb("saveInvite insert failed", error);
-      redirect(`/studio/new?error=save&code=${encodeURIComponent(error.code ?? "")}`);
-    }
+    if (error && error.code !== "23505") redirect(`/studio/new?${dbFail("saveInvite insert failed", error)}`);
   }
   redirect("/studio/new?error=save");
 }

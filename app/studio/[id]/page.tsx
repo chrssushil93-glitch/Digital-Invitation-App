@@ -17,12 +17,13 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Invitation · Nimantran" };
 
 type Rsvp = { id: string; name: string; resp: "yes" | "maybe" | "no"; guests: number; note: string; updated_at: string };
-type Search = { saved?: string; error?: string; d?: string; code?: string; pay?: string; published?: string };
+type Search = { saved?: string; error?: string; d?: string; dbcode?: string; pay?: string; published?: string };
 
 function statusLine(s: Search, published: boolean) {
   if (s.error === "name") return <span className="note err" role="alert">Please enter at least one name.</span>;
   if (s.error === "design") return <span className="note err" role="alert">That template costs more than you paid. Pick one at the same price or less.</span>;
-  if (s.error) return <span className="note err" role="alert">Could not save. Please try again.{s.code ? ` (code ${s.code.slice(0, 12)})` : ""}</span>;
+  if (s.error === "setup") return <span className="note err" role="alert">Not saved: the database is not set up yet (see the steps above).</span>;
+  if (s.error) return <span className="note err" role="alert">Could not save. Please try again.{s.dbcode ? ` (code ${s.dbcode.slice(0, 12)})` : ""}</span>;
   if (s.saved) return <span className="note okmsg" role="status">✓ Saved{published ? ". Guests see the update straight away." : " as a draft."}</span>;
   return null;
 }
@@ -63,6 +64,7 @@ export default async function InvitePage({ params, searchParams }: { params: { i
         </div>
       </div>
       <Steps current={!invite ? 1 : published ? 3 : 2} />
+      {searchParams.error === "setup" && <SetupNotice code={searchParams.dbcode?.slice(0, 12)} />}
 
       {invite && !published && (
         <section className="panel publish" aria-labelledby="pub-h">
