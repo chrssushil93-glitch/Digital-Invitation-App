@@ -87,7 +87,7 @@ button,input,select,textarea{font:inherit}
 .empty-inline{background:var(--sunk);border-radius:12px;padding:1rem;text-align:center;color:var(--muted)}
 
 /* ============================================================ landing */
-.hero{display:grid;grid-template-columns:1fr;gap:2rem;align-items:center;padding-block:1rem 3rem}
+.hero{display:grid;grid-template-columns:minmax(0,1fr);gap:2rem;align-items:center;padding-block:1rem 3rem}
 .heroart{width:100%;max-width:min(380px,calc((100svh - 6rem) * 9 / 16));justify-self:center}
 .lead{font-size:clamp(1.05rem,2.4vw,1.2rem);color:var(--muted);margin-block:1rem 1.6rem;max-width:34rem}
 .trust{margin-top:1rem}
@@ -158,7 +158,7 @@ textarea{min-height:5.5rem;resize:vertical}
 .spinner{width:30px;height:30px;border:3px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:doorspin 1s linear infinite}
 
 /* ============================================================ studio */
-.studio{display:grid;gap:1.25rem;min-width:0}
+.studio{display:grid;grid-template-columns:minmax(0,1fr);gap:1.25rem;min-width:0}
 .edtitle{font-size:clamp(1.4rem,4vw,1.8rem);margin-top:.6rem}
 .backlink{justify-self:start;text-decoration:none;font-weight:600;color:var(--muted);font-size:.92rem}
 .backlink:hover{color:var(--accent-ink)}
@@ -206,10 +206,11 @@ textarea{min-height:5.5rem;resize:vertical}
 .sharebtns{display:flex;gap:.6rem;flex-wrap:wrap}
 
 /* editor: template strip, then preview beside the details */
-.editor{display:grid;gap:1.25rem;min-width:0}
+.editor{display:grid;grid-template-columns:minmax(0,1fr);gap:1.25rem;min-width:0}
 .edsec{min-width:0}
-.tpick{border:0;padding:0;margin:0;min-width:0}
-.tstrip{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(92px,104px);gap:.75rem;overflow-x:auto;padding:4px 2px 12px;
+/* A fieldset is as wide as its content by default; without this the template row widens the whole page. */
+.tpick{border:0;padding:0;margin:0;min-width:0;width:100%;max-width:100%}
+.tstrip{max-width:100%;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(92px,104px);gap:.75rem;overflow-x:auto;padding:4px 2px 12px;
   scroll-snap-type:x proximity;overscroll-behavior-x:contain;scrollbar-width:thin}
 .topt{display:grid;gap:.25rem;cursor:pointer;position:relative;scroll-snap-align:start}
 .topt input{position:absolute;opacity:0;pointer-events:none}
@@ -219,7 +220,7 @@ textarea{min-height:5.5rem;resize:vertical}
 .topt input:disabled~*{opacity:.45} .topt:has(input:disabled){cursor:not-allowed}
 .tname{font-size:.78rem;text-align:center;line-height:1.2;font-weight:600}
 .tprice{font-size:.75rem;text-align:center;color:var(--gold);font-weight:700}
-.edmain{display:grid;grid-template-columns:1fr;gap:1.25rem;align-items:start;min-width:0}
+.edmain{display:grid;grid-template-columns:minmax(0,1fr);gap:1.25rem;align-items:start;min-width:0}
 .edpreview{min-width:0;width:100%;max-width:360px;justify-self:center}
 .livepv{display:grid;gap:.7rem}
 .pvhead{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
