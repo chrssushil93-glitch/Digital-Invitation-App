@@ -14,7 +14,11 @@ export async function GET() {
   const fmt = (e: { code?: string; message?: string } | null) => (e ? `${e.code}: ${e.message} -> run supabase/setup.sql` : "ok");
   const sb = createClient(url, key, { auth: { persistSession: false } });
   // Plain GETs: supabase-js turns the empty 404 of a HEAD request for a missing table into "no error".
-  const table = async (t: string) => fmt((await sb.from(t).select("id").limit(1)).error);
+  // Guests are not allowed to read these tables, so "permission denied" means the table exists and is locked: good.
+  const table = async (t: string) => {
+    const e = (await sb.from(t).select("id").limit(1)).error;
+    return e && e.code === "42501" ? "ok" : fmt(e);
+  };
 
   const out: Record<string, string> = {
     invites: await table("invites"),
