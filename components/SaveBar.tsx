@@ -9,9 +9,9 @@ type Action = (fd: FormData) => Promise<void>;
  * saves. The price follows the template picked in the form. Sticks to the bottom on phones.
  */
 export default function SaveBar({
-  formId, prices, published, saveDraft, saveAndPay, status,
+  formId, prices, freeAll = false, published, saveDraft, saveAndPay, status,
 }: {
-  formId: string; prices: Record<string, number>; published: boolean;
+  formId: string; prices: Record<string, number>; freeAll?: boolean; published: boolean;
   saveDraft: Action; saveAndPay: Action; status?: React.ReactNode;
 }) {
   const { pending } = useFormStatus();
@@ -27,6 +27,7 @@ export default function SaveBar({
   }, [formId]);
 
   const price = prices[design];
+  const free = freeAll || price === 0;
 
   return (
     <div className="savebar">
@@ -41,7 +42,7 @@ export default function SaveBar({
               {pending ? "Saving…" : "Save draft"}
             </button>
             <button className="btn" type="submit" formAction={saveAndPay} disabled={pending}>
-              {price ? `Save & pay ₹${price}` : "Save & pay"}
+              {free ? "Save & publish" : price ? `Save & pay ₹${price.toLocaleString("en-IN")}` : "Save & pay"}
             </button>
           </>
         )}

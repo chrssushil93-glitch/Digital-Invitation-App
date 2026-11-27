@@ -5,14 +5,16 @@ import SetupNotice from "@/components/SetupNotice";
 import { serverClient } from "@/lib/supabase/server";
 import { artSvg, catLabel, designBy } from "@/lib/designs";
 import { inviteTitle, isSetupError, type Invite } from "@/lib/studio";
+import { formatPrice, getSettings, isFree } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "My invitations · Nimantran" };
+export const metadata: Metadata = { title: "My invitations" };
 
 type Row = Pick<Invite, "id" | "n1" | "n2" | "occ" | "date_text" | "design" | "status" | "created_at">;
 
 export default async function StudioHome({ searchParams }: { searchParams: { deleted?: string } }) {
   const sb = serverClient();
+  const settings = await getSettings();
   const { data, error } = await sb
     .from("invites")
     .select("id,n1,n2,occ,date_text,design,status,created_at")
@@ -70,12 +72,13 @@ export default async function StudioHome({ searchParams }: { searchParams: { del
           {invites.map((i) => {
             const s = stats.get(i.id)!;
             const live = i.status === "published";
+            const offline = i.status === "suspended";
             return (
               <li key={i.id}>
                 <Link className="icard panel" href={`/studio/${i.id}`}>
                   <span className="art icthumb" dangerouslySetInnerHTML={{ __html: artSvg(designBy(i.design)) }} />
                   <span className="icbody">
-                    <span className={`badge ${live ? "live" : "draft"}`}>{live ? "● Live" : "Draft"}</span>
+                    <span className={`badge ${live ? "live" : offline ? "off" : "draft"}`}>{live ? "● Live" : offline ? "Offline" : "Draft"}</span>
                     <span className="ictitle">{inviteTitle(i)}</span>
                     <span className="note">{catLabel(i.occ)}{i.date_text ? ` · ${i.date_text}` : ""}</span>
                     {live ? (
@@ -84,8 +87,12 @@ export default async function StudioHome({ searchParams }: { searchParams: { del
                         <span><b>{s.replies}</b> replies</span>
                         <span><b>{s.coming}</b> coming</span>
                       </span>
+                    ) : offline ? (
+                      <span className="note">Taken offline by the site team</span>
                     ) : (
-                      <span className="note icnext">Pay ₹{designBy(i.design).p} to publish →</span>
+                      <span className="note icnext">
+                        {isFree(settings, i.design) ? "Publish for free →" : `Pay ${formatPrice(settings, i.design)} to publish →`}
+                      </span>
                     )}
                   </span>
                 </Link>

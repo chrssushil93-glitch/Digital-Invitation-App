@@ -1,7 +1,8 @@
 import LivePreview from "@/components/LivePreview";
 import DraftKeeper from "@/components/DraftKeeper";
 import SaveBar from "@/components/SaveBar";
-import { artSvg, cats, designs } from "@/lib/designs";
+import { artSvg, cats } from "@/lib/designs";
+import { logoUrl, priceMap, visibleDesigns, type SiteSettings } from "@/lib/settings";
 import { saveAndPay, saveDraft } from "@/app/studio/actions";
 
 export type EditorValues = {
@@ -9,19 +10,22 @@ export type EditorValues = {
   date_text: string; time_text: string; venue: string; msg: string; design: string;
 };
 
-const PRICES = Object.fromEntries(designs.map((d) => [d.n, d.p]));
-
 /**
  * The invitation editor: template strip, then the live phone preview, then the text boxes.
  * Works without an account; saving asks the host to log in and keeps what they typed.
+ * Prices, the templates on offer, free publishing and the watermark come from the admin settings.
  */
 export default function InviteEditor({
-  v, published = false, paidAmount = null, restoreDraft = false, status,
+  v, settings, published = false, paidAmount = null, restoreDraft = false, status,
 }: {
-  v: EditorValues; published?: boolean; paidAmount?: number | null; restoreDraft?: boolean; status?: React.ReactNode;
+  v: EditorValues; settings: SiteSettings; published?: boolean; paidAmount?: number | null; restoreDraft?: boolean; status?: React.ReactNode;
 }) {
   const lang = v.lang === "hi" || v.lang === "mr" ? v.lang : "en";
+  const prices = priceMap(settings);
+  const offered = visibleDesigns(settings, v.design);
+  const freeAll = settings.paymentsMode === "free";
   const locked = (p: number) => published && paidAmount != null && p > paidAmount;
+  const label = (n: string) => (freeAll || prices[n] === 0 ? "Free" : `₹${prices[n].toLocaleString("en-IN")}`);
   return (
     <>
       <form className="editor" id="invform" action={saveDraft}>
@@ -30,17 +34,17 @@ export default function InviteEditor({
         <section className="panel edsec" aria-labelledby="tpl-h">
           <div className="sechead">
             <h2 className="h3" id="tpl-h">Choose a template</h2>
-            <span className="note">{designs.length} designs · swipe for more</span>
+            <span className="note">{offered.length} designs · swipe for more</span>
           </div>
           <fieldset className="tpick">
             <legend className="sr-only">Template</legend>
             <div className="tstrip">
-              {designs.map((x) => (
-                <label key={x.n} className="topt" title={locked(x.p) ? "Costs more than you paid for this invitation" : undefined}>
-                  <input type="radio" name="design" value={x.n} defaultChecked={x.n === v.design} disabled={locked(x.p)} />
+              {offered.map((x) => (
+                <label key={x.n} className="topt" title={locked(prices[x.n]) ? "Costs more than you paid for this invitation" : undefined}>
+                  <input type="radio" name="design" value={x.n} defaultChecked={x.n === v.design} disabled={locked(prices[x.n])} />
                   <span className="art" dangerouslySetInnerHTML={{ __html: artSvg(x) }} />
                   <span className="tname">{x.n}</span>
-                  <span className="tprice">{locked(x.p) ? "🔒 " : ""}₹{x.p}</span>
+                  <span className="tprice">{locked(prices[x.n]) ? "🔒 " : ""}{label(x.n)}</span>
                 </label>
               ))}
             </div>
@@ -52,7 +56,10 @@ export default function InviteEditor({
             <LivePreview
               formId="invform"
               initialLang={lang}
-              watermark={!published}
+              watermark={!published && settings.watermark}
+              logo={logoUrl(settings)}
+              prices={prices}
+              freeAll={freeAll}
               initial={{ n1: v.n1, n2: v.n2, occ: v.occ, date_text: v.date_text, time_text: v.time_text, venue: v.venue, msg: v.msg, design: v.design }}
             />
           </div>
@@ -104,7 +111,7 @@ export default function InviteEditor({
               <textarea id="msg" name="msg" maxLength={500} rows={3} placeholder="With the blessings of our families…" defaultValue={v.msg} />
             </div>
 
-            <SaveBar formId="invform" prices={PRICES} published={published} saveDraft={saveDraft} saveAndPay={saveAndPay} status={status} />
+            <SaveBar formId="invform" prices={prices} freeAll={freeAll} published={published} saveDraft={saveDraft} saveAndPay={saveAndPay} status={status} />
           </section>
         </div>
       </form>

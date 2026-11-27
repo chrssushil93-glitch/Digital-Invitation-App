@@ -1,9 +1,25 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
+import { serverClient } from "@/lib/supabase/server";
 
-/** Where a host may be sent after signing in. Anything else falls back to the studio. */
+/** Where someone may be sent after signing in. Anything else falls back to the studio. */
 export function safeNext(v: string | null | undefined): string {
-  return v && /^\/(studio|create)(\/[\w-]*)?$/.test(v) ? v : "/studio";
+  return v && /^\/(studio|create|admin)(\/[\w-]+)*$/.test(v) ? v : "/studio";
 }
+
+export type Account = { userId: string; email: string; admin: boolean; blocked: boolean; reason: string };
+
+/** The signed-in person, checked with Supabase, plus their standing. Once per request. */
+export const currentAccount = cache(async (): Promise<Account | null> => {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return null;
+  const sb = serverClient();
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return null;
+  // Before the admin part of supabase/setup.sql is run, my_account does not exist: treat as a regular host.
+  const { data, error } = await sb.rpc("my_account");
+  const a = (error ? null : data) as { admin?: boolean; blocked?: boolean; reason?: string | null } | null;
+  return { userId: user.id, email: user.email ?? "", admin: Boolean(a?.admin), blocked: Boolean(a?.blocked), reason: a?.reason ?? "" };
+});
 
 /** Cheap check for the header: is there a Supabase session cookie? (Pages that need the user verify it properly.) */
 export function hasSessionCookie(): boolean {

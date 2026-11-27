@@ -7,6 +7,7 @@ import DoorReveal from "@/components/DoorReveal";
 import InviteCard from "@/components/InviteCard";
 import DoorCredit from "@/components/DoorCredit";
 import MusicPlayer from "@/components/MusicPlayer";
+import { getSettings } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,7 @@ export default async function GuestPage({ params }: { params: { slug: string } }
 
   const lang = asLang(inv.lang);
   const g = G[lang];
+  const { siteName } = await getSettings();
 
   return (
     <div className="wrap">
@@ -46,7 +48,7 @@ export default async function GuestPage({ params }: { params: { slug: string } }
           <InviteCard inv={inv} lang={lang} />
         </DoorReveal>
         <GuestForm slug={inv.slug} strings={g} />
-        <p className="gfoot">{g.foot}</p>
+        <p className="gfoot">{g.foot.replace("Nimantran", siteName)}</p>
         <DoorCredit />
       </div>
     </div>

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import AuthHashHandler from "@/components/AuthHashHandler";
+import { getSettings } from "@/lib/settings";
 
-export const metadata: Metadata = {
-  title: "Nimantran",
-  description: "Animated digital invitations in English, Hindi and Marathi with built-in RSVPs and view tracking.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const s = await getSettings();
+  return { title: { default: s.siteName, template: `%s · ${s.siteName}` }, description: s.metaDescription };
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

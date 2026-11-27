@@ -53,3 +53,16 @@ export function validWebhookSignature(rawBody: string, signature: string): boole
   const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
   return safeEqualHex(expected, signature);
 }
+
+export type RazorpayPayment = { id: string; status: string; amount: number; method?: string; created_at?: number };
+
+/** The payments Razorpay has recorded against an order (for the admin's "Check with Razorpay"). */
+export async function orderPayments(orderId: string): Promise<RazorpayPayment[]> {
+  const res = await fetch(`https://api.razorpay.com/v1/orders/${encodeURIComponent(orderId)}/payments`, {
+    headers: { Authorization: "Basic " + Buffer.from(`${keyId()}:${keySecret()}`).toString("base64") },
+    cache: "no-store",
+  });
+  const body = (await res.json().catch(() => null)) as { items?: RazorpayPayment[]; error?: { description?: string } } | null;
+  if (!res.ok) throw new Error(body?.error?.description ?? `Razorpay answered ${res.status}`);
+  return body?.items ?? [];
+}

@@ -4,13 +4,14 @@ import { validWebhookSignature } from "@/lib/razorpay";
 
 export const dynamic = "force-dynamic";
 
-type Entity = { id?: string; order_id?: string; amount?: number };
-type Event = { event?: string; payload?: { payment?: { entity?: Entity }; order?: { entity?: Entity } } };
+type Entity = { id?: string; order_id?: string; payment_id?: string; amount?: number };
+type Event = { event?: string; payload?: { payment?: { entity?: Entity }; order?: { entity?: Entity }; refund?: { entity?: Entity } } };
 
 /**
- * Razorpay webhook (events: payment.captured, order.paid). Publishes the invitation even if
- * the host closed the page before checkout reported back. Set it up in the Razorpay dashboard:
- * Settings -> Webhooks -> <site>/api/pay/webhook, with RAZORPAY_WEBHOOK_SECRET as the secret.
+ * Razorpay webhook (events: payment.captured, order.paid, refund.processed). Publishes the invitation
+ * even if the host closed the page before checkout reported back, and marks refunds made in the
+ * Razorpay dashboard. Set it up in Razorpay: Settings -> Webhooks -> <site>/api/pay/webhook,
+ * with RAZORPAY_WEBHOOK_SECRET as the secret.
  */
 export async function POST(req: Request) {
   const raw = await req.text();
@@ -24,6 +25,16 @@ export async function POST(req: Request) {
     ev = JSON.parse(raw) as Event;
   } catch {
     return NextResponse.json({ ok: false }, { status: 400 });
+  }
+  if (ev.event === "refund.processed" || ev.event === "refund.created") {
+    const paymentId = ev.payload?.refund?.entity?.payment_id ?? ev.payload?.payment?.entity?.id ?? "";
+    if (!paymentId) return NextResponse.json({ ok: true, ignored: true });
+    const { error } = await adminClient().rpc("payment_refunded", { p_payment_id: paymentId });
+    if (error) {
+      console.error("pay/webhook: payment_refunded failed", error.code, error.message, paymentId);
+      return NextResponse.json({ ok: false }, { status: 500 });
+    }
+    return NextResponse.json({ ok: true });
   }
   if (ev.event !== "payment.captured" && ev.event !== "order.paid") return NextResponse.json({ ok: true, ignored: true });
 

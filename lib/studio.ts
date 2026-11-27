@@ -3,7 +3,8 @@ import { headers } from "next/headers";
 export type Invite = {
   id: string; slug: string; n1: string; n2: string; occ: string; lang: string;
   date_text: string; time_text: string; venue: string; msg: string; design: string;
-  status: "draft" | "published"; paid_amount: number | null; published_at: string | null; created_at: string;
+  status: "draft" | "published" | "suspended"; paid_amount: number | null; published_at: string | null; created_at: string;
+  publish_source?: string | null; offline_reason?: string | null;
 };
 
 /** Errors that mean supabase/setup.sql has not been run (fully) on this database. */

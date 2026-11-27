@@ -13,6 +13,27 @@ Built with Next.js 14 (App Router), Supabase (Postgres and sign-in) and Razorpay
 
 Guests can open only published invitations. A draft's link shows "not available".
 
+## Admin panel (`/admin`)
+
+For the people who run the site. It needs no extra keys: everything goes through database functions that check the caller is an admin.
+
+| Page | What you can do |
+| --- | --- |
+| Overview | Revenue (7, 30 or 90 days, Indian time), paid and unpaid orders, new customers, invitations, guest views and RSVPs; daily charts with a table view; best-selling templates; a checklist of anything still blocking payments |
+| Orders | Every Razorpay order with filters, search and CSV export. Check an unpaid order with Razorpay, mark it paid (UPI, cash), or record a refund and take the invitation down |
+| Customers | Every account with spend and invitations, CSV export. Put a customer on hold (they cannot create, edit or pay, and their live invitations go offline), lift it, give or remove admin access, or delete the account (orders are kept) |
+| Invitations | Every invitation with views and replies, CSV export. Publish without payment, take offline with a reason the host sees, put back online, move to draft, edit the text, delete |
+| Settings | Site name, logo (also the preview watermark), home page headline and text, announcement bar, support email and WhatsApp, Razorpay or free publishing, pause new invitations, and each template's price and visibility |
+| Activity | A log of every admin action: who, what, when |
+
+**Make yourself an admin** (once, after signing up on the site), in Supabase → SQL Editor:
+
+```sql
+insert into public.admins (user_id) select id from auth.users where email = 'you@example.com' on conflict do nothing;
+```
+
+After that, more admins can be added from Settings → Admins. People who are not admins get a plain "not found" at `/admin`.
+
 ## What is in here
 
 | Path | What it is |
@@ -70,11 +91,13 @@ Open `/api/health`. Every line should say `ok`. Anything else names the missing 
 
 ### 6. Your logo
 
-Replace `public/brand/logo.svg` with your logo (keep the file name). To use a PNG instead, put it in `public/brand/` and change `WATERMARK_LOGO` in `lib/brand.ts`.
+Upload it in `/admin` → Settings → Logo. It is used in the header and as the watermark on unpaid previews. Until then the built-in `public/brand/logo.svg` is used.
 
 ## How data is protected
 
 - Hosts can only read and change their own invitations, replies, views and payments (row level security).
+- Admin powers live in `admin_*` database functions that each start by checking `public.admins`; the admin pages check too, so a mistake in one layer does not open the other. Every admin action is written to `admin_log`.
+- A customer on hold is stopped by the database itself (row level security), not only by the site.
 - Hosts can change only an invitation's text and design. The payment columns (`status`, `paid_amount`, `published_at`) can be set only by the `confirm_payment` database function, which only the server's service role may call, and only after Razorpay's signature checks out. Nobody can publish without paying, even by calling the database directly.
 - The amount charged is worked out on the server from the template's price, never sent by the browser.
 - After publishing, a host can switch only to templates that cost the same or less than they paid.
@@ -86,7 +109,7 @@ Replace `public/brand/logo.svg` with your logo (keep the file name). To use a PN
 
 ## Not built yet
 
-More designs and languages, refunds from the studio, the Monday email report, video and PDF export, and rate limiting on the guest endpoints.
+More designs and languages, discount codes, refunds issued from the admin (today: refund in Razorpay, then record it), the Monday email report, video and PDF export, and rate limiting on the guest endpoints.
 
 ## 3D model credits (CC BY 4.0)
 - Old wooden Door by Ellie3D (Sketchfab)

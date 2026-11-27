@@ -9,7 +9,7 @@ export default function InviteNotFound() {
         <p className="note">
           The link may be mistyped, or the invitation has not been published yet. Please check the link with the person who sent it.
         </p>
-        <div className="row center"><Link className="btn ghost small" href="/">Go to Nimantran</Link></div>
+        <div className="row center"><Link className="btn ghost small" href="/">Go to the home page</Link></div>
       </div>
     </main>
   );

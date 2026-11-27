@@ -1,28 +1,34 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import StudioShell from "@/components/StudioShell";
 import InviteEditor from "@/components/InviteEditor";
 import Steps from "@/components/Steps";
 import SetupNotice from "@/components/SetupNotice";
+import SupportLine from "@/components/SupportLine";
 import PayButton from "@/components/PayButton";
 import ShareCard from "@/components/ShareCard";
 import AutoRefresh from "@/components/AutoRefresh";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
 import { serverClient } from "@/lib/supabase/server";
-import { designBy, designs } from "@/lib/designs";
+import { currentAccount } from "@/lib/auth";
+import { formatPrice, getSettings, isFree, priceOf, visibleDesigns } from "@/lib/settings";
 import { inviteTitle, isSetupError, siteOrigin, type Invite } from "@/lib/studio";
-import { deleteInvite } from "../actions";
+import { deleteInvite, publishFree } from "../actions";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Invitation · Nimantran" };
+export const metadata: Metadata = { title: "Invitation" };
 
 type Rsvp = { id: string; name: string; resp: "yes" | "maybe" | "no"; guests: number; note: string; updated_at: string };
 type Search = { saved?: string; error?: string; d?: string; dbcode?: string; pay?: string; published?: string };
 
 function statusLine(s: Search, published: boolean) {
   if (s.error === "name") return <span className="note err" role="alert">Please enter at least one name.</span>;
-  if (s.error === "design") return <span className="note err" role="alert">That template costs more than you paid. Pick one at the same price or less.</span>;
+  if (s.error === "design") return <span className="note err" role="alert">That template is not available for this invitation. Pick another one.</span>;
   if (s.error === "setup") return <span className="note err" role="alert">Not saved: the database is not set up yet (see the steps above).</span>;
+  if (s.error === "hold") return <span className="note err" role="alert">Not saved: your account is on hold.</span>;
+  if (s.error === "closed") return <span className="note err" role="alert">New invitations are paused right now. Please try again later.</span>;
+  if (s.error === "price") return <span className="note err" role="alert">This template needs payment now. Use the Pay button above.</span>;
   if (s.error) return <span className="note err" role="alert">Could not save. Please try again.{s.dbcode ? ` (code ${s.dbcode.slice(0, 12)})` : ""}</span>;
   if (s.saved) return <span className="note okmsg" role="status">✓ Saved{published ? ". Guests see the update straight away." : " as a draft."}</span>;
   return null;
@@ -31,6 +37,7 @@ function statusLine(s: Search, published: boolean) {
 export default async function InvitePage({ params, searchParams }: { params: { id: string }; searchParams: Search }) {
   const isNew = params.id === "new";
   let invite: Invite | null = null;
+  const [settings, acct] = await Promise.all([getSettings(), currentAccount()]);
 
   if (!isNew) {
     if (!/^[0-9a-f-]{36}$/i.test(params.id)) notFound();
@@ -48,29 +55,56 @@ export default async function InvitePage({ params, searchParams }: { params: { i
   }
 
   const published = invite?.status === "published";
+  const offline = invite?.status === "suspended";
+  const offered = visibleDesigns(settings, invite?.design);
   const values = invite ?? {
     id: "", n1: "Meera", n2: "Kabir", occ: "wedding", lang: "en", date_text: "Sunday, 14 February 2027",
     time_text: "7:30 PM onwards", venue: "City Palace, Udaipur",
     msg: "With the blessings of our families, we invite you to celebrate with us.",
-    design: designs.some((x) => x.n === searchParams.d) ? searchParams.d! : designs[0].n,
+    design: offered.some((x) => x.n === searchParams.d) ? searchParams.d! : offered[0]?.n ?? "Royal Portico",
   };
+  const closed = isNew && !settings.acceptingNew && !acct?.admin;
+  const free = invite ? isFree(settings, invite.design) : false;
 
   return (
     <StudioShell back>
       <div className="pagehead">
         <div>
           <h1 className="pagetitle">{invite ? inviteTitle(invite) : "New invitation"}</h1>
-          {invite && <span className={`badge ${published ? "live" : "draft"}`}>{published ? "● Live" : "Draft · only you can see it"}</span>}
+          {invite && (
+            <span className={`badge ${published ? "live" : offline ? "off" : "draft"}`}>
+              {published ? "● Live" : offline ? "Offline" : "Draft · only you can see it"}
+            </span>
+          )}
         </div>
       </div>
-      <Steps current={!invite ? 1 : published ? 3 : 2} />
+      {!offline && <Steps current={!invite ? 1 : published ? 3 : 2} />}
       {searchParams.error === "setup" && <SetupNotice code={searchParams.dbcode?.slice(0, 12)} />}
 
-      {invite && !published && (
+      {closed && (
+        <div className="panel notice" role="status">
+          <h2 className="h3">New invitations are paused</h2>
+          <p>We are not taking new invitations at the moment. Your existing invitations still work.</p>
+          <SupportLine />
+          <div className="row"><Link className="btn ghost small" href="/studio">Back to my invitations</Link></div>
+        </div>
+      )}
+
+      {invite && offline && (
+        <div className="panel notice" role="alert">
+          <h2 className="h3">This invitation is offline</h2>
+          <p>The site team took it offline, so guests cannot open the link right now.{invite.offline_reason ? ` Reason: ${invite.offline_reason}.` : ""}</p>
+          <SupportLine prefix="To ask about it:" />
+        </div>
+      )}
+
+      {invite && invite.status === "draft" && (
         <section className="panel publish" aria-labelledby="pub-h">
           <div className="pubtext">
             <h2 className="h3" id="pub-h">Ready to send it?</h2>
-            <p className="note">Pay once for this invitation to publish it and get the link for your guests.</p>
+            <p className="note">
+              {free ? "Publishing this invitation is free right now." : "Pay once for this invitation to publish it and get the link for your guests."}
+            </p>
             <ul className="ticks">
               <li>One link for WhatsApp, SMS and email</li>
               <li>RSVPs with head-counts, and who opened it</li>
@@ -78,8 +112,15 @@ export default async function InvitePage({ params, searchParams }: { params: { i
             </ul>
           </div>
           <div className="pubpay">
-            <p className="pubprice"><b>₹{designBy(invite.design).p}</b><span>one-time · {invite.design}</span></p>
-            <PayButton inviteId={invite.id} price={designBy(invite.design).p} autoOpen={searchParams.pay === "1"} />
+            <p className="pubprice"><b>{formatPrice(settings, invite.design)}</b><span>{free ? invite.design : `one-time · ${invite.design}`}</span></p>
+            {free ? (
+              <form action={publishFree} className="paybox">
+                <input type="hidden" name="id" value={invite.id} />
+                <button className="btn big" type="submit">Publish & get guest link</button>
+              </form>
+            ) : (
+              <PayButton inviteId={invite.id} price={priceOf(settings, invite.design)} siteName={settings.siteName} autoOpen={searchParams.pay === "1"} />
+            )}
           </div>
         </section>
       )}
@@ -91,19 +132,22 @@ export default async function InvitePage({ params, searchParams }: { params: { i
       {invite && published && <Responses invite={invite} />}
 
       {invite && published && <h2 className="edtitle">Edit invitation</h2>}
-      <InviteEditor
-        v={{ ...values, id: invite?.id ?? "" }}
-        published={published}
-        paidAmount={invite?.paid_amount ?? null}
-        restoreDraft={isNew}
-        status={statusLine(searchParams, published)}
-      />
+      {!closed && (
+        <InviteEditor
+          v={{ ...values, id: invite?.id ?? "" }}
+          settings={settings}
+          published={published || offline}
+          paidAmount={invite?.paid_amount ?? null}
+          restoreDraft={isNew}
+          status={statusLine(searchParams, published)}
+        />
+      )}
 
       {invite && (
         <section className="panel danger" aria-labelledby="del-h">
           <h2 className="h3" id="del-h">Delete invitation</h2>
           <p className="note">
-            {published ? "The guest link stops working and all replies are deleted. Payments are not refunded." : "This draft will be removed."}
+            {published ? "The guest link stops working and all replies are deleted. Payments are not refunded." : "This invitation will be removed."}
           </p>
           <form action={deleteInvite}>
             <input type="hidden" name="id" value={invite.id} />

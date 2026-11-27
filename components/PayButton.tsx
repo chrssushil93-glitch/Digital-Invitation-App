@@ -31,7 +31,9 @@ function loadCheckout(): Promise<boolean> {
  * Pays for a draft invitation with Razorpay Checkout. On success the server checks the
  * signature and publishes the invitation, then the page reloads to show the guest link.
  */
-export default function PayButton({ inviteId, price, autoOpen = false }: { inviteId: string; price: number; autoOpen?: boolean }) {
+export default function PayButton({
+  inviteId, price, autoOpen = false, siteName = "Nimantran",
+}: { inviteId: string; price: number; autoOpen?: boolean; siteName?: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ text: string; bad: boolean } | null>(null);
@@ -61,7 +63,7 @@ export default function PayButton({ inviteId, price, autoOpen = false }: { invit
         order_id: order.orderId,
         amount: order.amount,
         currency: order.currency,
-        name: "Nimantran",
+        name: siteName,
         description: order.description,
         prefill: { email: order.email },
         theme: { color: "#6b1428" },
@@ -93,7 +95,7 @@ export default function PayButton({ inviteId, price, autoOpen = false }: { invit
       setBusy(false);
       setMsg({ text: e instanceof Error ? e.message : "Could not start the payment.", bad: true });
     }
-  }, [inviteId, router]);
+  }, [inviteId, router, siteName]);
 
   useEffect(() => {
     if (!autoOpen || opened.current) return;

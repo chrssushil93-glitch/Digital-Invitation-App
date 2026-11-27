@@ -4,7 +4,6 @@ import DoorReveal from "@/components/DoorReveal";
 import InviteCard, { type InviteData } from "@/components/InviteCard";
 import { designBy, type Lang } from "@/lib/designs";
 import { G } from "@/lib/i18n";
-import { WATERMARK_LOGO } from "@/lib/brand";
 
 const FIELDS = ["n1", "n2", "occ", "date_text", "time_text", "venue", "msg", "design"] as const;
 
@@ -14,8 +13,11 @@ const FIELDS = ["n1", "n2", "occ", "date_text", "time_text", "venue", "msg", "de
  * is paid for, the logo is tiled over it so a screenshot is not a usable invitation.
  */
 export default function LivePreview({
-  formId, initial, initialLang, watermark = true,
-}: { formId: string; initial: InviteData; initialLang: Lang; watermark?: boolean }) {
+  formId, initial, initialLang, watermark = true, logo = "/brand/logo.svg", prices = {}, freeAll = false,
+}: {
+  formId: string; initial: InviteData; initialLang: Lang; watermark?: boolean;
+  logo?: string; prices?: Record<string, number>; freeAll?: boolean;
+}) {
   const [inv, setInv] = useState<InviteData>(initial);
   const [lang, setLang] = useState<Lang>(initialLang);
   const [mode, setMode] = useState<"card" | "opening">("card");
@@ -66,14 +68,14 @@ export default function LivePreview({
           )}
           {watermark && (
             <div className="wm" aria-hidden="true">
-              <div className="wmtile" style={{ backgroundImage: `url(${WATERMARK_LOGO})` }} />
+              <div className="wmtile" style={{ backgroundImage: `url(${logo})` }} />
               <span className="wmbadge">Preview</span>
             </div>
           )}
         </div>
       </div>
       <p className="note pvnote">
-        {d.n} · ₹{d.p}. Changes show here as you type.
+        {d.n} · {freeAll || prices[d.n] === 0 ? "Free" : `₹${(prices[d.n] ?? d.p).toLocaleString("en-IN")}`}. Changes show here as you type.
         {watermark ? " Guests see it without the watermark once you publish." : " Save to update the guest link."}
       </p>
     </aside>

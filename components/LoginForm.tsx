@@ -18,7 +18,9 @@ const TITLES: Record<Mode, string> = {
 };
 
 /** Password sign-in / sign-up, an emailed sign-in link, and Google when it is switched on in Supabase. */
-export default function LoginForm({ google, saving, error }: { google: boolean; saving: boolean; error: string }) {
+export default function LoginForm({
+  google, saving, next, siteName, error,
+}: { google: boolean; saving: boolean; next: string; siteName: string; error: string }) {
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,7 +33,6 @@ export default function LoginForm({ google, saving, error }: { google: boolean; 
         ? { text: "That sign-in link did not work or has expired. Please sign in again.", bad: true }
         : null
   );
-  const next = saving ? "/studio/new" : "/studio";
 
   const switchTo = (m: Mode) => {
     setMode(m);
@@ -80,7 +81,7 @@ export default function LoginForm({ google, saving, error }: { google: boolean; 
 
   return (
     <div className="authcard panel">
-      <p className="eyebrow">Nimantran studio</p>
+      <p className="eyebrow">{siteName} studio</p>
       <h1 className="authtitle">{TITLES[mode]}</h1>
       {saving && (
         <p className="callout">Your invitation is safe. Sign in to save it; it will be waiting exactly as you left it.</p>
@@ -133,7 +134,7 @@ export default function LoginForm({ google, saving, error }: { google: boolean; 
       <div className="authswitch">
         {mode === "signin" && (
           <>
-            <p>New to Nimantran? <button type="button" className="linkbtn" onClick={() => switchTo("signup")}>Create an account</button></p>
+            <p>New to {siteName}? <button type="button" className="linkbtn" onClick={() => switchTo("signup")}>Create an account</button></p>
             <p><button type="button" className="linkbtn" onClick={() => switchTo("link")}>Email me a sign-in link instead</button></p>
           </>
         )}

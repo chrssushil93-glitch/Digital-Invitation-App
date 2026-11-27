@@ -5,12 +5,17 @@ import DoorReveal from "@/components/DoorReveal";
 import InviteCard from "@/components/InviteCard";
 import DoorCredit from "@/components/DoorCredit";
 import DesignGallery from "@/components/DesignGallery";
+import { getSettings, priceMap, visibleDesigns } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
-const from = Math.min(...designs.map((d) => d.p));
-
-export default function Home() {
+export default async function Home() {
+  const s = await getSettings();
+  const prices = priceMap(s);
+  const offered = visibleDesigns(s);
+  const paid = offered.map((d) => prices[d.n]).filter((p) => p > 0);
+  const freeAll = s.paymentsMode === "free" || paid.length === 0;
+  const from = paid.length ? Math.min(...paid) : 0;
   return (
     <div className="wrap">
       <SiteHeader />
@@ -18,21 +23,20 @@ export default function Home() {
         <section className="hero">
           <div className="herotext">
             <p className="eyebrow">Animated invitations · हिन्दी · English · मराठी</p>
-            <h1>An invitation that opens like a door.</h1>
-            <p className="lead">
-              Pick a design, add your names and date, and share one link on WhatsApp. Guests reply with a tap and
-              you see who has opened it. No app or sign-up for guests.
-            </p>
+            <h1>{s.heroTitle}</h1>
+            <p className="lead">{s.heroText}</p>
             <div className="row">
               <Link className="btn big" href="/create">Create an invitation</Link>
               <a className="btn ghost big" href="#designs">Browse designs</a>
             </div>
-            <p className="note trust">Free to design and preview · pay from ₹{from} only when you publish</p>
+            <p className="note trust">
+              {freeAll ? "Free to design, preview and publish" : `Free to design and preview · pay from ₹${from.toLocaleString("en-IN")} only when you publish`}
+            </p>
           </div>
           <div className="heroart">
             <DoorReveal hint="Tap to open" replayLabel="Replay the doors" autoOpenMs={2600}>
               <InviteCard lang="en" inv={{ n1: "Meera", n2: "Kabir", occ: "wedding", date_text: "14 February 2027", time_text: "7:30 PM",
-                venue: "City Palace, Udaipur", msg: "With the blessings of our families, we invite you to celebrate with us.", design: designs[0].n }} />
+                venue: "City Palace, Udaipur", msg: "With the blessings of our families, we invite you to celebrate with us.", design: (offered[0] ?? designs[0]).n }} />
             </DoorReveal>
           </div>
         </section>
@@ -42,7 +46,7 @@ export default function Home() {
           <h2 id="how-h">Ready in five minutes</h2>
           <ol className="how">
             <li><span className="hownum">1</span><h3>Design it</h3><p>Choose a template, type your names, date and venue, and watch the preview update as you type.</p></li>
-            <li><span className="hownum">2</span><h3>Pay once &amp; publish</h3><p>Pay securely with UPI, card or net banking through Razorpay. No subscription.</p></li>
+            <li><span className="hownum">2</span><h3>{freeAll ? "Publish" : <>Pay once &amp; publish</>}</h3><p>{freeAll ? "Publish in one tap. No subscription, no app for guests." : "Pay securely with UPI, card or net banking through Razorpay. No subscription."}</p></li>
             <li><span className="hownum">3</span><h3>Share &amp; track</h3><p>Send the link on WhatsApp. See who opened it and who is coming, live.</p></li>
           </ol>
         </section>
@@ -50,7 +54,7 @@ export default function Home() {
         <section className="block" id="designs" aria-labelledby="designs-h">
           <p className="eyebrow">The collection</p>
           <h2 id="designs-h" style={{ marginBottom: "1.2rem" }}>What are we celebrating?</h2>
-          <DesignGallery />
+          <DesignGallery visible={offered.map((d) => d.n)} prices={prices} freeAll={s.paymentsMode === "free"} />
         </section>
 
         <section className="block" aria-labelledby="after-h">
