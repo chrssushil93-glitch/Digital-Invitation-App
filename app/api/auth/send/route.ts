@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { noStoreFetch } from "@/lib/supabase/fetch";
 import { EMAIL_RE, authMessage } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +23,7 @@ export async function POST(request: Request) {
   // email is opened on a different phone or browser from the one that asked for it.
   const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     auth: { flowType: "implicit", persistSession: false, autoRefreshToken: false },
+    global: { fetch: noStoreFetch },
   });
   const origin = new URL(request.url).origin;
   const { error } = await sb.auth.signInWithOtp({

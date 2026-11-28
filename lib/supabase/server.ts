@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { noStoreFetch } from "./fetch";
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
@@ -10,6 +11,7 @@ export function serverClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      global: { fetch: noStoreFetch },
       cookies: {
         getAll() {
           return store.getAll();

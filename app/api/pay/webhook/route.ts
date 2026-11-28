@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminClient, adminConfigured } from "@/lib/supabase/admin";
+import { confirmPayment, markRefunded, paymentsDbConfigured } from "@/lib/paymentsDb";
 import { validWebhookSignature } from "@/lib/razorpay";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   if (!validWebhookSignature(raw, req.headers.get("x-razorpay-signature") ?? "")) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
-  if (!adminConfigured()) return NextResponse.json({ ok: false }, { status: 503 });
+  if (!paymentsDbConfigured()) return NextResponse.json({ ok: false }, { status: 503 });
 
   let ev: Event;
   try {
@@ -29,10 +29,11 @@ export async function POST(req: Request) {
   if (ev.event === "refund.processed" || ev.event === "refund.created") {
     const paymentId = ev.payload?.refund?.entity?.payment_id ?? ev.payload?.payment?.entity?.id ?? "";
     if (!paymentId) return NextResponse.json({ ok: true, ignored: true });
-    const { error } = await adminClient().rpc("payment_refunded", { p_payment_id: paymentId });
-    if (error) {
-      console.error("pay/webhook: payment_refunded failed", error.code, error.message, paymentId);
-      return NextResponse.json({ ok: false }, { status: 500 });
+    try {
+      await markRefunded(paymentId);
+    } catch (e) {
+      console.error("pay/webhook: refund not recorded", e instanceof Error ? e.message : e, paymentId);
+      return NextResponse.json({ ok: false }, { status: 500 }); // Razorpay retries
     }
     return NextResponse.json({ ok: true });
   }
@@ -42,13 +43,12 @@ export async function POST(req: Request) {
   const orderId = pay?.order_id ?? ev.payload?.order?.entity?.id ?? "";
   if (!orderId || !pay?.id) return NextResponse.json({ ok: true, ignored: true });
 
-  const { data, error } = await adminClient().rpc("confirm_payment", {
-    p_order_id: orderId, p_payment_id: pay.id, p_amount: typeof pay.amount === "number" ? pay.amount : null,
-  });
-  if (error) {
-    console.error("pay/webhook: confirm_payment failed", error.code, error.message, orderId);
+  try {
+    const done = await confirmPayment(orderId, pay.id, typeof pay.amount === "number" ? pay.amount : null);
+    if (!done) console.error("pay/webhook: no matching order or amount mismatch", orderId);
+  } catch (e) {
+    console.error("pay/webhook: confirm failed", e instanceof Error ? e.message : e, orderId);
     return NextResponse.json({ ok: false }, { status: 500 }); // Razorpay retries
   }
-  if (!data) console.error("pay/webhook: no matching order or amount mismatch", orderId);
   return NextResponse.json({ ok: true });
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { serverClient } from "@/lib/supabase/server";
-import { adminClient, adminConfigured } from "@/lib/supabase/admin";
+import { paymentsDbConfigured, recordOrder } from "@/lib/paymentsDb";
 import { createOrder, razorpayConfigured, razorpayKeyId } from "@/lib/razorpay";
 import { designBy } from "@/lib/designs";
 import { currentAccount } from "@/lib/auth";
@@ -20,8 +20,8 @@ export async function POST(req: Request) {
   if (!acct) return fail("Please log in again.", 401);
   if (acct.blocked) return fail("Your account is on hold, so payments are paused.", 403);
 
-  if (!razorpayConfigured() || !adminConfigured()) {
-    console.error("pay/order: payments are not configured (RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, SUPABASE_SERVICE_ROLE_KEY)");
+  if (!razorpayConfigured() || !paymentsDbConfigured()) {
+    console.error("pay/order: payments are not configured (RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, PAYMENTS_DB_SECRET)");
     return fail("Online payment is not available right now. Please try again later.", 503);
   }
 
@@ -44,11 +44,7 @@ export async function POST(req: Request) {
   try {
     const order = await createOrder(amount, inv.id, { invite_id: inv.id, design: design.n });
     // Email and title are copied onto the order so the admin's history survives later deletions.
-    const { error: insErr } = await adminClient().from("payments").insert({
-      invite_id: inv.id, owner: acct.userId, order_id: order.id, design: design.n, amount, currency: "INR",
-      customer_email: acct.email || null, invite_title: title,
-    });
-    if (insErr) throw new Error(`payments insert: ${insErr.code} ${insErr.message}`);
+    await recordOrder({ inviteId: inv.id, owner: acct.userId, orderId: order.id, design: design.n, amount, email: acct.email, title });
     return NextResponse.json({
       ok: true,
       keyId: razorpayKeyId(),

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ColumnChart, RankBars, Tile } from "@/components/admin/charts";
 import { OrderPill, href } from "@/components/admin/ui";
 import { adminCall, count, day, requireAdmin, rupees, rupeesShort, type Overview } from "@/lib/admin";
-import { adminConfigured } from "@/lib/supabase/admin";
+import { paymentsKeyState } from "@/lib/paymentsDb";
 import { razorpayConfigured } from "@/lib/razorpay";
 import { getSettings } from "@/lib/settings";
 
@@ -19,13 +19,14 @@ function shortDay(d: string): string {
 export default async function AdminOverview({ searchParams }: { searchParams: { days?: string } }) {
   await requireAdmin();
   const days = RANGES.includes(Number(searchParams.days)) ? Number(searchParams.days) : 30;
-  const [o, s] = await Promise.all([adminCall<Overview>("admin_overview", { p_days: days }), getSettings()]);
+  const [o, s, pk] = await Promise.all([adminCall<Overview>("admin_overview", { p_days: days }), getSettings(), paymentsKeyState()]);
 
   // What still stops the site from taking money, in plain words.
   const todo: { text: string; fix: string }[] = [];
   if (s.paymentsMode === "razorpay") {
     if (!razorpayConfigured()) todo.push({ text: "Razorpay keys are missing, so hosts cannot pay yet.", fix: "Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in Vercel → Settings → Environment Variables, then redeploy. Or switch publishing to free in Settings." });
-    if (!adminConfigured()) todo.push({ text: "The Supabase service role key is missing, so payments cannot be confirmed.", fix: "Add SUPABASE_SERVICE_ROLE_KEY in Vercel (Supabase → Project Settings → API Keys → secret key), then redeploy." });
+    if (pk === "missing") todo.push({ text: "The payments key is missing, so payments cannot be recorded or confirmed.", fix: "Add PAYMENTS_DB_SECRET in Vercel (any random text, 32+ characters), redeploy, then press Connect payments in Settings." });
+    if (pk === "unlinked") todo.push({ text: "The payments key is not connected yet.", fix: "Settings → Payments and publishing → Connect payments." });
     if (razorpayConfigured() && !process.env.RAZORPAY_WEBHOOK_SECRET) todo.push({ text: "No Razorpay webhook secret: a payment made by someone who closes the page early is only confirmed when you check it.", fix: "Razorpay → Webhooks → add <site>/api/pay/webhook (payment.captured, order.paid, refund.processed); put its secret in Vercel as RAZORPAY_WEBHOOK_SECRET." });
   }
 

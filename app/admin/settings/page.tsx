@@ -5,9 +5,9 @@ import ConfirmSubmit from "@/components/ConfirmSubmit";
 import { adminCall, requireAdmin, type CustomerRow, type Paged } from "@/lib/admin";
 import { artSvg, catLabel, designs } from "@/lib/designs";
 import { getSettings, logoUrl } from "@/lib/settings";
-import { adminConfigured } from "@/lib/supabase/admin";
+import { paymentsKeyState } from "@/lib/paymentsDb";
 import { razorpayConfigured } from "@/lib/razorpay";
-import { addAdminByEmail, customerRole, saveSettings } from "../actions";
+import { addAdminByEmail, customerRole, linkPaymentsKey, saveSettings } from "../actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Admin settings" };
@@ -18,7 +18,8 @@ export default async function AdminSettings({ searchParams }: { searchParams: { 
     getSettings(),
     adminCall<Paged<CustomerRow>>("admin_customers", { p_filter: "admins", p_search: "", p_limit: 100, p_offset: 0 }),
   ]);
-  const keysReady = razorpayConfigured() && adminConfigured();
+  const pk = await paymentsKeyState();
+  const keysReady = razorpayConfigured() && pk === "ok";
 
   return (
     <>
@@ -29,6 +30,24 @@ export default async function AdminSettings({ searchParams }: { searchParams: { 
         </div>
       </div>
       <Flash ok={searchParams.ok} err={searchParams.err} />
+
+      <section className="panel" aria-labelledby="pay-h">
+        <h2 className="h3" id="pay-h">Payment connection</h2>
+        <ul className="checklist">
+          <li className={razorpayConfigured() ? "done" : "todo"}>
+            <b>Razorpay keys</b> {razorpayConfigured() ? "are set." : "are missing: add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in Vercel and redeploy."}
+          </li>
+          <li className={pk === "ok" ? "done" : "todo"}>
+            <b>Payments key</b>{" "}
+            {pk === "ok" ? "is connected." : pk === "missing" ? "is missing: add PAYMENTS_DB_SECRET (any random text, 32+ characters) in Vercel and redeploy." : pk === "setup" ? "needs the database update (supabase/setup.sql)." : "is set in Vercel but not connected yet."}
+          </li>
+        </ul>
+        {pk === "unlinked" && (
+          <form action={linkPaymentsKey}>
+            <button className="btn small" type="submit">Connect payments</button>
+          </form>
+        )}
+      </section>
 
       <form action={saveSettings} className="settingsform" encType="multipart/form-data">
         <section className="panel" aria-labelledby="g-h">

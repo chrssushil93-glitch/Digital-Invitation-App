@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { noStoreFetch } from "@/lib/supabase/fetch";
 
 // Keeps the host's Supabase session fresh on studio and auth routes.
 export async function middleware(request: NextRequest) {
@@ -18,6 +19,7 @@ export async function middleware(request: NextRequest) {
   if (!url || !key) return response;
 
   const supabase = createServerClient(url, key, {
+    global: { fetch: noStoreFetch },
     cookies: {
       getAll() {
         return request.cookies.getAll();

@@ -5,6 +5,7 @@ import { serverClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin";
 import { cats, designs } from "@/lib/designs";
 import { orderPayments, razorpayConfigured } from "@/lib/razorpay";
+import { paymentsDbConfigured, paymentsKeyHash } from "@/lib/paymentsDb";
 import { getSettings, MAX_PRICE, normalizeSettings, SETTINGS_TAG } from "@/lib/settings";
 
 const str = (fd: FormData, k: string, max = 300) => String(fd.get(k) ?? "").trim().slice(0, max);
@@ -195,4 +196,11 @@ export async function saveSettings(fd: FormData): Promise<void> {
   if (error) redirect(withMsg(back, "err", error.message));
   revalidateTag(SETTINGS_TAG);
   redirect(withMsg(back, "ok", "settings"));
+}
+
+/** Stores the fingerprint of the server's PAYMENTS_DB_SECRET, so the database accepts it. */
+export async function linkPaymentsKey(): Promise<void> {
+  await requireAdmin();
+  if (!paymentsDbConfigured()) redirect(withMsg("/admin/settings", "err", "PAYMENTS_DB_SECRET is not set in Vercel yet (32+ characters), or the site was not redeployed after adding it."));
+  await run("/admin/settings", "admin_set_server_key", { p_hash: paymentsKeyHash() }, "payments_linked");
 }

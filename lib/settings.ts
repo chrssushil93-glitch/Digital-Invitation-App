@@ -86,7 +86,9 @@ async function readSettings(): Promise<SiteSettings> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return DEFAULT_SETTINGS;
-  const sb = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  // Cached like the function around it, under the same tag, so saving in the admin refreshes both at once.
+  const taggedFetch: typeof fetch = (input, init) => fetch(input, { ...init, next: { revalidate: 300, tags: [SETTINGS_TAG] } });
+  const sb = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false }, global: { fetch: taggedFetch } });
   const { data, error } = await sb.from("site_settings").select("data").eq("id", 1).maybeSingle();
   if (error) {
     // Before supabase/setup.sql adds the table, run on defaults.

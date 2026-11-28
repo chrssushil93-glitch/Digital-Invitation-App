@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { noStoreFetch } from "@/lib/supabase/fetch";
 
 export const dynamic = "force-dynamic";
 
@@ -8,7 +9,7 @@ export async function GET(req: Request, { params }: { params: { name: string } }
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!/^[a-z0-9-]{1,40}$/.test(params.name) || !url || !key) return new NextResponse("Not found", { status: 404 });
-  const sb = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  const sb = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false }, global: { fetch: noStoreFetch } });
   const { data, error } = await sb.rpc("site_asset", { p_name: params.name });
   const a = data as { mime: string; data: string } | null;
   if (error || !a) return new NextResponse("Not found", { status: 404 });

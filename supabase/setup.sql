@@ -215,6 +215,9 @@ grant usage on schema public to anon, authenticated, service_role;
 -- Hosts may write only the invitation's text and design. The payment columns
 -- (status, paid_amount, published_at, publish_source, offline_reason) change only through
 -- the functions below, so nobody can publish without paying.
+-- Guests reach the tables only through the guest functions below; nobody gets truncate/trigger rights.
+revoke all on public.invites, public.rsvps, public.views, public.payments from anon;
+revoke truncate, references, trigger on public.invites, public.rsvps, public.views, public.payments from authenticated;
 revoke insert, update on public.invites from anon, authenticated;
 grant select, delete on public.invites to authenticated;
 grant insert (owner, slug, n1, n2, occ, lang, date_text, time_text, venue, msg, design) on public.invites to authenticated;
@@ -407,6 +410,55 @@ begin
   update public.invites set status = 'published', published_at = coalesce(published_at, now()), publish_source = 'free'
     where id = p_id;
   return jsonb_build_object('status', 'published', 'slug', v.slug);
+end;
+$$;
+
+-- ================================================================ the site server's payments key
+-- The server records Razorpay orders and confirms payments with its own key (PAYMENTS_DB_SECRET),
+-- not the all-powerful Supabase service role key. Only the key's SHA-256 hash is stored here, and
+-- the key opens nothing but the three functions below. An admin links it from Admin -> Settings.
+
+create table if not exists public.server_keys (
+  name text primary key,
+  hash text not null check (hash ~ '^[0-9a-f]{64}$'),
+  updated_at timestamptz not null default now()
+);
+alter table public.server_keys enable row level security;
+revoke all on public.server_keys from anon, authenticated;
+grant all on public.server_keys to service_role;
+
+create or replace function public.server_key_ok(p_secret text)
+returns boolean language sql stable security definer set search_path = public as $$
+  select coalesce(
+    char_length(coalesce(p_secret, '')) >= 32
+    and encode(sha256(convert_to(p_secret, 'UTF8')), 'hex') = (select hash from public.server_keys where name = 'payments'),
+    false);
+$$;
+
+create or replace function public.server_record_order(p_secret text, p_invite uuid, p_owner uuid, p_order_id text,
+  p_design text, p_amount int, p_email text default '', p_title text default '')
+returns boolean language plpgsql security definer set search_path = public as $$
+begin
+  if not public.server_key_ok(p_secret) then raise exception 'Not allowed.' using errcode = '42501'; end if;
+  insert into public.payments (invite_id, owner, order_id, design, amount, currency, customer_email, invite_title)
+    values (p_invite, p_owner, p_order_id, p_design, p_amount, 'INR', nullif(btrim(coalesce(p_email, '')), ''), nullif(btrim(coalesce(p_title, '')), ''));
+  return true;
+end;
+$$;
+
+create or replace function public.server_confirm_payment(p_secret text, p_order_id text, p_payment_id text, p_amount int default null)
+returns jsonb language plpgsql security definer set search_path = public as $$
+begin
+  if not public.server_key_ok(p_secret) then raise exception 'Not allowed.' using errcode = '42501'; end if;
+  return public.confirm_payment(p_order_id, p_payment_id, p_amount);
+end;
+$$;
+
+create or replace function public.server_payment_refunded(p_secret text, p_payment_id text)
+returns boolean language plpgsql security definer set search_path = public as $$
+begin
+  if not public.server_key_ok(p_secret) then raise exception 'Not allowed.' using errcode = '42501'; end if;
+  return public.payment_refunded(p_payment_id);
 end;
 $$;
 
@@ -917,6 +969,18 @@ begin
 end;
 $$;
 
+-- Links the server's payments key: stores its SHA-256 hash (never the key itself).
+create or replace function public.admin_set_server_key(p_hash text)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  perform public.admin_guard();
+  if p_hash is null or p_hash !~ '^[0-9a-f]{64}$' then raise exception 'That is not a key fingerprint.' using errcode = '22023'; end if;
+  insert into public.server_keys (name, hash, updated_at) values ('payments', p_hash, now())
+    on conflict (name) do update set hash = excluded.hash, updated_at = now();
+  perform public.admin_note('payments.link', 'payments key', '{}'::jsonb);
+end;
+$$;
+
 create or replace function public.admin_activity(p_limit int default 50, p_offset int default 0)
 returns jsonb language plpgsql stable security definer set search_path = public as $$
 declare v_out jsonb;
@@ -962,6 +1026,16 @@ revoke all on function public.publish_for_payment(uuid) from public, anon, authe
 grant execute on function public.confirm_payment(text, text, int) to service_role;
 grant execute on function public.payment_refunded(text) to service_role;
 
+-- The site server, with its payments key (the key is checked inside each function).
+revoke all on function public.server_key_ok(text) from public, anon, authenticated;
+revoke all on function public.server_record_order(text, uuid, uuid, text, text, int, text, text) from public, anon, authenticated;
+revoke all on function public.server_confirm_payment(text, text, text, int) from public, anon, authenticated;
+revoke all on function public.server_payment_refunded(text, text) from public, anon, authenticated;
+grant execute on function public.server_key_ok(text) to anon, authenticated;
+grant execute on function public.server_record_order(text, uuid, uuid, text, text, int, text, text) to anon, authenticated;
+grant execute on function public.server_confirm_payment(text, text, text, int) to anon, authenticated;
+grant execute on function public.server_payment_refunded(text, text) to anon, authenticated;
+
 -- Internal helpers: nobody calls these directly.
 revoke all on function public.admin_guard() from public, anon, authenticated;
 revoke all on function public.admin_note(text, text, jsonb) from public, anon, authenticated;
@@ -985,13 +1059,15 @@ revoke all on function public.admin_save_settings(jsonb) from public, anon;
 revoke all on function public.admin_save_asset(text, text, text) from public, anon;
 revoke all on function public.admin_delete_asset(text) from public, anon;
 revoke all on function public.admin_activity(int, int) from public, anon;
+revoke all on function public.admin_set_server_key(text) from public, anon;
 grant execute on function public.admin_overview(int), public.admin_orders(text, text, int, int),
   public.admin_customers(text, text, int, int), public.admin_customer(uuid), public.admin_invites(text, text, int, int),
   public.admin_invite(uuid), public.admin_invite_action(uuid, text, text), public.admin_update_invite(uuid, jsonb),
   public.admin_delete_invite(uuid), public.admin_set_blocked(uuid, boolean, text), public.admin_user_id(text),
   public.admin_set_role(uuid, boolean), public.admin_delete_customer(uuid, text),
   public.admin_payment_action(text, text, text, text, boolean), public.admin_save_settings(jsonb),
-  public.admin_save_asset(text, text, text), public.admin_delete_asset(text), public.admin_activity(int, int)
+  public.admin_save_asset(text, text, text), public.admin_delete_asset(text), public.admin_activity(int, int),
+  public.admin_set_server_key(text)
   to authenticated;
 
 -- Make the API notice the changes straight away.

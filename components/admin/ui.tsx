@@ -15,6 +15,7 @@ const OK: Record<string, string> = {
   draft: "Invitation moved back to draft.", edited: "Invitation updated.", deleted: "Deleted.",
   hold: "Customer put on hold.", release: "Hold lifted.", admin_add: "Admin access given.", admin_remove: "Admin access removed.",
   paid: "Order marked as paid; the invitation is live.", refunded: "Order marked as refunded.",
+  payments_linked: "Payments connected. Hosts can now pay with Razorpay.",
   rzp_paid: "Razorpay confirms the payment: order marked paid and the invitation is live.",
   rzp_none: "Razorpay has no completed payment for this order yet.",
   rzp_auth: "Razorpay shows the payment as authorised but not captured. Capture it in the Razorpay dashboard, then check again.",
